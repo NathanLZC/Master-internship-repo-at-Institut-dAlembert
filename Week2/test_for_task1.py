@@ -64,6 +64,18 @@ plt.xlabel('x')
 plt.ylabel('y')
 plt.show()
 
+
+
+#plot the pressure distribution
+pressure_img = plt.imshow(P/p0, extent=[x_min + dx/2, x_max, y_min + dx/2, y_max], 
+                            origin='lower', interpolation='bicubic', cmap=plt.cm.inferno, vmax = 1)
+fig.colorbar(pressure_img, ax=ax[0], label='Pressure', orientation="horizontal")
+plt.set_title('Pressure Distribution')
+plt.set_xlabel('x')
+plt.set_ylabel('y')
+
+
+
 #we define the frequency with q_x and q_y
 q_x = 2 * np.pi * np.fft.fftfreq(n, d=L/n)
 q_y = 2 * np.pi * np.fft.fftfreq(m, d=L/m)
