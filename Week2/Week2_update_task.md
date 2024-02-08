@@ -18,7 +18,7 @@
 
   ​			 ---- reference2: https://en.wikipedia.org/wiki/Viscoelasticity
 
-  ​			 ---- reference3: *Classical and computational solid mechanics*, Yuanzhen Feng
+  ​			 ---- reference3: *Classical and computational solid mechanics*, Yuan-Cheng Fung
 
   ​			 ---- reference4: NON-LINEAR FINITE ELEMENT ANALYSIS OF SOLIDS AND STRUCTURES - SECOND EDITION, **8th chapiter**, René de Borst, University of Glasgow, UK
 
