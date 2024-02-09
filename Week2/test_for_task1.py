@@ -1,9 +1,9 @@
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import time
 
 
-# We define the force as F, we give F as input
+# We define the total loading P as F, we give F as input
 F = np.linspace(0, 1e6, 1000)
 
 
@@ -20,23 +20,55 @@ E_star = 1 / ((1 - v1**2) / E1 + (1 - v2**2) / E2)
 # We define the contact radius as a
 a = 3*F*R/(4*E_star)
 
-# We define the domain is L^2
+# We define the half-space domain is L^2
 L = 2
 
-
-
-
-
-d_analytical = a**2 / R
-
-
-#Here we define p0 as the reference pressure
-p0 = (1/np.pi) * (6*F*(E_star**2)/(R**2))**(1/3) 
 #We generate a 2D coordinate space
 n = 100
 m = 100
 
 x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))#notice here that we use endpoint=False to avoid having the last point
+
+# We define the distance from the center of the sphere
+r = np.sqrt(x**2 + y**2)
+
+'''
+#Here we define p0 as the reference pressure
+p0 = (1/np.pi) * (6*F*(E_star**2)/(R**2))**(1/3) #this is the reference pressure
+
+## We define the analytical displacement field
+
+Analytical_displacement = np.pi*p0*(2*a**2-r**2)/(4*E_star*a) #this is the analytical displacement field
+
+
+d_total_deformation = a**2 / R
+
+#d_total_deformation
+
+#d_total_deformation2 = (9 * F**2 / (16 * E_star**2 * R))**(1/3)
+
+#d_total_deformation2
+'''
+
+# 修正：对每个 F 值计算并可视化位移场
+for F_value in F[::100]:  # 示例：每100个F值取一个进行处理和可视化
+    a = (3*F_value*R/(4*E_star))**(1/3)  # 接触半径
+    p0 = (6*F_value*E_star**2/(np.pi**3*R**2))**(1/3)  # 参考压力
+    u_z = np.pi*p0*(2*a**2-r**2)/(4*a*E_star)  # 位移场
+    u_z[r > a] = 0  # 超出接触区域的位移设置为0
+
+    # 可视化位移场
+    plt.figure(figsize=(6, 5))
+    plt.imshow(u_z, extent=(0, L, 0, L), origin='lower')
+    plt.colorbar(label='Displacement')
+    plt.title(f'Analytical Displacement Field for F={F_value:.1e} N')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.show()
+
+
+
+
 
 #Here we define the pressure distribution
 def pressure_distribution(x, y, x0, y0, a, p0):
