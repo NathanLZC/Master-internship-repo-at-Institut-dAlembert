@@ -50,14 +50,15 @@ d_total_deformation = a**2 / R
 #d_total_deformation2
 '''
 
-# 修正：对每个 F 值计算并可视化位移场
-for F_value in F[::100]:  # 示例：每100个F值取一个进行处理和可视化
-    a = (3*F_value*R/(4*E_star))**(1/3)  # 接触半径
-    p0 = (6*F_value*E_star**2/(np.pi**3*R**2))**(1/3)  # 参考压力
-    u_z = np.pi*p0*(2*a**2-r**2)/(4*a*E_star)  # 位移场
-    u_z[r > a] = 0  # 超出接触区域的位移设置为0
 
-    # 可视化位移场
+# compute and visualize the displacement field for each F value
+for F_value in F[::100]:  # Only plot every 100th value to avoid clutter
+    a = (3*F_value*R/(4*E_star))**(1/3)  # contact radius
+    p0 = (6*F_value*E_star**2/(np.pi**3*R**2))**(1/3)  # reference pressure
+    u_z = np.pi*p0*(2*a**2-r**2)/(4*a*E_star)  # analytical displacement field
+    u_z[r > a] = 0  # set the displacement outside the contact area to zero
+
+    # Visualize the displacement field
     plt.figure(figsize=(6, 5))
     plt.imshow(u_z, extent=(0, L, 0, L), origin='lower')
     plt.colorbar(label='Displacement')
@@ -83,7 +84,7 @@ x0 = 0
 y0 = 0
 
 #We calculate test pressure on the grid
-test_pressure = pressure_distribution(x, x0, p0)
+test_pressure = pressure_distribution(x, y, x0, y0, p0)
 #We generate the pressure distribution in Fourier space
 pressure_fourier = np.fft.fft2(test_pressure, norm='ortho')
 # Visualization of the Fourier-transformed pressure
