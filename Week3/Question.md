@@ -1,0 +1,1 @@
+Legendre transform for dual problem
