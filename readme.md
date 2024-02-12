@@ -1,6 +1,6 @@
 # Master Thesis Project
 
-## Title of Your Thesis
+## Fluage et surfaces rugueuses : évolution du contact entre matériaux viscoélastiques
 
 A brief description of your thesis project goes here. Explain the problem you're addressing, the hypothesis or research questions you're exploring, and the significance of your work.
 
@@ -25,13 +25,13 @@ Say what the step will be, for example:
 1. **Clone the repo**
 
 ```bash
-git clone https://github.com/yourusername/your-repository-name.git
+git clone https://github.com/NathanLZC/Master-internship-repo-at-Institut-dAlembert
 ```
 
 2. **Navigate to the project directory**
 
 ```bash
-cd your-repository-name
+cd Master-internship-repo-at-Institut-dAlembert
 ```
 
 3. **Install the required packages**
@@ -67,7 +67,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Your Name** - *Initial work* - [YourUsername](https://github.com/YourUsername)
+* **Zichen Li** - *Initial work* - [YourUsername](https://github.com/YourUsername)
 
 See also the list of [contributors](https://github.com/yourusername/your-repository-name/contributors) who participated in this project.
 

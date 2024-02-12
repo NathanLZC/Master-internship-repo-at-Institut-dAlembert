@@ -1,10 +1,5 @@
 '''
-#git clone https://github.com/spack/spack.git#this step finished
-. ./spack/share/spack/setup-env.sh
-spack env create fenicsx-env
-spack env activate fenicsx-env
-spack add fenics-dolfinx+adios2 py-fenics-dolfinx cflags="-O3" fflags="-O3"
-spack install
+https://nathanlzc.github.io/post/conda-envirment-configuration-and-fenics-installation-on-ubuntu/
 '''
 
 
