@@ -17,7 +17,7 @@ Here we cite documents in CMET 2024 courses by Prof. Yastrebov.
   
   with $\mathcal{F}=\int_A p\left[u_z / 2+g\right] d A$
 
-
+![Analytical models](figures/Analytical_models.png)
 
 
 ## Reference:
