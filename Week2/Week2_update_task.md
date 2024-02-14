@@ -24,7 +24,9 @@
 
   ​			 ---- reference5: lectures on viscoelasticity and the part of the book of Jean Salençon
 
-  
+        ---- reference6: 
+
+
 
 Question: We focus on viscoelasticy in polymer, what is the difference in other materials?
 
