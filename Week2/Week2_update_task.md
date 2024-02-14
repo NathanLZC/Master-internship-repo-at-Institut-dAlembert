@@ -24,7 +24,7 @@
 
   ​			 ---- reference5: lectures on viscoelasticity and the part of the book of Jean Salençon
 
-        ---- reference6: 
+        ---- reference6: Christensen, R. M. Theory of Viscoelasticity: An Introduction. 2nd ed. New York: Academic Press, 1982.
 
 
 
