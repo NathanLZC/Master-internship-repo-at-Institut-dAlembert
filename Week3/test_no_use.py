@@ -57,6 +57,8 @@ def E_c(p, x, y, R=1):
 # Perform the minimization
 result = minimize(lambda p: objective(p, xx, yy), p_initial, method='SLSQP', constraints=cons, options={'disp': True})
 
+print(result)
+
 if result.success:
     optimized_p = result.x
     print("Optimization successful.")
