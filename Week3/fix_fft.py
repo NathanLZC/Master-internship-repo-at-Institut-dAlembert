@@ -32,7 +32,7 @@ h_matrix = - (x**2 + y**2)/(2*R)
 p_initial = np.full((n, m), W / S).flatten()  # Flatten for optimization
 
 # Fourier transform of initial pressure distribution
-p0_fourier = np.fft.fft2(p_initial.reshape(n, m), norm='ortho').flatten()  # Keep flattened
+P_fourier_flattened = np.fft.fft2(p_initial.reshape(n, m), norm='ortho').flatten()  # Keep flattened
 
 
 #the following are critial
@@ -43,9 +43,17 @@ q_y = 2 * np.pi * np.fft.fftfreq(m, d=L/m)
 QX, QY = np.meshgrid(q_x, q_y)
 
 kernel_fourier = np.zeros_like(QX)  # Initialize the kernel array
+'''
 #non_zero_indices = (QX**2 + QY**2) != 0  # Avoid division by zero
 kernel_fourier = 2 / (E_star * np.sqrt(QX**2 + QY**2))
 kernel_fourier[0, 0] = 0  # Set the zero frequency component to zero
+'''
+# ?????
+Q_magnitude = np.sqrt(QX**2 + QY**2)
+Q_magnitude[0, 0] = 1  # Avoid division by zero
+kernel_fourier = 2 / (E_star * Q_magnitude)
+kernel_fourier[0, 0] = 0  # Set the zero frequency component to zero
+
 
 def cost_function(P_fourier_flattened, kernel_fourier, h_matrix):
     # Ensure kernel_fourier and h_matrix are correctly shaped and prepared before this function is called
@@ -85,8 +93,6 @@ def gradient(P_fourier_flattened, kernel_fourier, h_matrix):
 
     return u_z - h_matrix
 
-jac = gradient(p0_fourier, kernel_fourier, h_matrix)
-
 
 
 
@@ -96,15 +102,18 @@ h_matrix_flattened = h_matrix.flatten()
 
 
  # define the length of the pressure vector
-n = len(p0_fourier)  # p_bar is initial guess for the pressure
+n = len(P_fourier_flattened)  # p_bar is initial guess for the pressure
 # first non_negative_constraint for the pressure
 non_negative_constraint = LinearConstraint(np.eye(n), np.zeros(n), np.inf*np.ones(n))
 
 # second avarage_constraint for the pressure
-average_pressure_constraint = LinearConstraint(np.ones((1, n))/S, [p0_fourier*S], [p0_fourier*S])
+average_pressure_constraint = LinearConstraint(np.ones((1, n))/S, [P_fourier_flattened*S], [P_fourier_flattened*S])
+
+jac = gradient(P_fourier_flattened, kernel_fourier_flattened, h_matrix)
 
 
-result = minimize(cost_function, p0_fourier, method='trust-constr', jac=jac, constraints=[non_negative_constraint, average_pressure_constraint])
+
+result = minimize(cost_function, P_fourier_flattened, method='trust-constr', jac=jac, constraints=[non_negative_constraint, average_pressure_constraint])
 
 
 # Process the result
