@@ -1,69 +1,78 @@
 import numpy as np
-from scipy.optimize import minimize
-
-#define the parameters
-W = 1e2  # total load
-R = 1  # radius of demi-sphere
-L = 2  # domain size
-S = L**2  # domain area
 
 
+# Define the parameters
+W = 1e2  # Total load
+R = 1  # Radius of demi-sphere
+L = 2  # Domain size
+S = L**2  # Domain area
 
-#define material parameters
+# Material parameters
 E = 1e3  # Young's modulus
 nu = 0.3  # Poisson's ratio
-E_star = E / (1 - nu**2)  # plane strain modulus 
+E_star = E / (1 - nu**2)  # Plane strain modulus
 
-#We generate a 2D coordinate space
+# Generate a 2D coordinate space
 n = 100
 m = 100
+x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))
 
-x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))#notice here that we use endpoint=False to avoid having the last point
+# Define the separation h
+h_matrix = - (x**2 + y**2) / (2 * R)
 
-x0 = 1
-y0 = 1
+# Initial pressure distribution
+P = np.full((n, m), W / S)  # Initial guess for the pressure
 
-# Define the separation h          #Since we are using the same model, we can use the same h function
-h = - (x**2 + y**2)/(2*R)
+# Frequency components for the Fourier transform
+q_x = 2 * np.pi * np.fft.fftfreq(n, d=L/n)
+q_y = 2 * np.pi * np.fft.fftfreq(m, d=L/m)
+QX, QY = np.meshgrid(q_x, q_y)
 
-p_bar = W / S  
+# Define the kernel in the Fourier domain
+kernel_fourier = np.zeros_like(QX)
+kernel_fourier = 2 / (E_star * np.sqrt(QX**2 + QY**2))
+kernel_fourier[0, 0] = np.inf  # Avoid division by zero at the zero frequency
 
-h_norm = np.abs(h(x, y, R)) #norm of the h function
+# Initialize variables for the iteration
+tol = 1e-6  # Tolerance for convergence
+iter_max = 1000  # Maximum number of iterations
+k = 0  # Iteration counter
+error = np.inf  # Initialize error
 
-alpha_0 = 1e-2  # learning rate
-tol = 1e-6  # tolerance for convergence
-iter_max = 1000  # maximum number of iterations
+while np.abs(error) > tol and k < iter_max:
+    # Calculate the gradient G in the Fourier domain and transform it back to the spatial domain
+    P_fourier = np.fft.fft2(P, norm='ortho')
+    G_fourier = P_fourier * kernel_fourier
+    G = np.fft.ifft2(G_fourier, norm='ortho').real - h_matrix
+    
+    # Update P by subtracting G
+    P = P - alpha_0 * G
+    
+    # Ensure P is non-negative
+    P = np.maximum(P, 0)
+    
+    # Adjust P to satisfy the total load constraint
+    alpha_0 = (W - np.sum(P)) / np.size(P)
+    P += alpha_0
+    
+    # Calculate the error for convergence checking
+    error = np.linalg.norm(G) / np.linalg.norm(h_matrix)
+    
+    k += 1  # Increment the iteration counter
 
-# Initialize P with the average constant load initial guess
-P = np.full((n, m), p_bar)
+'''
+# Ensure a positive gap by updating G
+G = G - np.min(G)
+'''
 
+displacement_fourier = P_fourier * kernel_fourier
+displacement = np.fft.ifft2(displacement_fourier, norm='ortho').real
 
-P = p_bar #Initial guess for the pressure
-
-for k in range(0, iter_max): 
-    if np.abs(error) < tol:
-
-        #gradient(gap)
-        G = 
-        P = P - G
-
-
-
-
-        p = 
-
-        error =
-
-
-
-        k += 1
-        if np.abs(error) < tol:
-            p_bar = p
-        else:
-            print('Convergence failed')
-
-    G = G - min(0, G)  # project the gradient onto the non-negative orthant
-            
-
-
-
+# Plot the results
+import matplotlib.pyplot as plt
+plt.imshow(displacement, cmap='jet', origin='lower', extent=[0, L, 0, L])
+plt.colorbar(label='Displacement (u_z)')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Displacement Field')
+plt.show()

@@ -2,13 +2,11 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.optimize import LinearConstraint
 
-
 #define the parameters
 W = 1e2  # total load
 R = 1  # radius of demi-sphere
 L = 2  # domain size
 S = L**2  # domain area
-
 
 
 #define material parameters
@@ -95,7 +93,6 @@ def gradient(P_fourier_flattened, kernel_fourier, h_matrix):
 
 
 
-
 # Flatten kernel_fourier and h_matrix if they are not already flattened, depending on how you pass them to the function
 kernel_fourier_flattened = kernel_fourier.flatten()
 h_matrix_flattened = h_matrix.flatten()
@@ -130,8 +127,85 @@ print(displacement_optimized_real)
 #######################################################
 ## The following is the code for week 2, hertz solution
 #######################################################
+'''
 
 import matplotlib.pyplot as plt
 
+F_value = 1e2 
+
+# We define the radius of the elastic sphere as R
+R = 1
+
+#define material parameters
+E = 1e3  # Young's modulus
+nu = 0.3  # Poisson's ratio
+E_star = E / (1 - nu**2)  # plane strain modulus 
+
+# We define the half-space domain is L^2
+L = 2
+
+#We generate a 2D coordinate space
+n = 100
+m = 100
+
+x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))#notice here that we use endpoint=False to avoid having the last point
+
+x0 = 1
+y0 = 1
+
+# We define the distance from the center of the sphere
+r = np.sqrt((x-x0)**2 + (y-y0)**2)
+
+#Here we define p0 as the reference pressure
+p0 = (6*F_value*E_star**2/(np.pi**3*R**2))**(1/3)
+a = (3*F_value*R/(4*E_star))**(1/3)
+
+u_z = -(r**2)/(2*R)
+
+# Correctly applying the displacement outside the contact area
+outside_contact = r > a
+u_z_outside = -(r[outside_contact]**2)/(2*R) + a * np.sqrt(r[outside_contact]**2 - a**2)/(np.pi*R) + (r[outside_contact]**2-2*a**2)*np.arccos(a/r[outside_contact])/(np.pi*R)
+u_z[outside_contact] = u_z_outside
+
+#plot u_z
+plt.imshow(u_z, cmap='jet', origin='lower', extent=[0, L, 0, L])
+plt.colorbar(label='Displacement (u_z)')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Displacement Field')
+plt.show()
 
 
+'''
+
+
+#######################################################
+## The following is comparasion of the two solutions
+#######################################################
+
+'''
+
+from mpl_toolkits.mplot3d import Axes3D
+
+# Calculate the error between the real part of the displacement obtained through FFT and the analytical solution
+error = np.abs(np.real(displacement_optimized_real) - u_z)
+
+# Create a 3D plot
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# Create a surface plot of the error
+X, Y = np.meshgrid(np.linspace(0, L, n), np.linspace(0, L, m))
+surf = ax.plot_surface(X, Y, error, cmap='viridis', edgecolor='none')
+
+# Add a color bar which maps values to colors
+fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5)
+
+# Labels and title
+ax.set_xlabel('X axis')
+ax.set_ylabel('Y axis')
+ax.set_zlabel('Error')
+ax.set_title('Error between Analytical and Fourier Method Displacement')
+
+plt.show()
+'''
