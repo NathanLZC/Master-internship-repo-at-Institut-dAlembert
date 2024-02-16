@@ -124,3 +124,14 @@ displacement_optimized_fourier = P_optimized_fourier * kernel_fourier
 displacement_optimized_real = np.fft.ifft2(displacement_optimized_fourier, norm='ortho').real
 
 print(displacement_optimized_real)
+
+
+
+#######################################################
+## The following is the code for week 2, hertz solution
+#######################################################
+
+import matplotlib.pyplot as plt
+
+
+
