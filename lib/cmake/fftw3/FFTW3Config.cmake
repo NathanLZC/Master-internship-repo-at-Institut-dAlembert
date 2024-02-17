@@ -7,8 +7,8 @@ endif ()
 set (FFTW3_CONFIG_FILE "${CMAKE_CURRENT_LIST_FILE}")
 
 set (FFTW3_LIBRARIES fftw3)
-set (FFTW3_LIBRARY_DIRS /gagarine/temporaires/zli/Master-internship-repo-at-Institut-dAlembert/lib)
-set (FFTW3_INCLUDE_DIRS /gagarine/temporaires/zli/Master-internship-repo-at-Institut-dAlembert/include)
+set (FFTW3_LIBRARY_DIRS /usr/local/lib)
+set (FFTW3_INCLUDE_DIRS /usr/local/include)
 
 include ("${CMAKE_CURRENT_LIST_DIR}/FFTW3LibraryDepends.cmake")
 

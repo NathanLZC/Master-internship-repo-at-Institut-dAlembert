@@ -1,4 +1,4 @@
-prefix=/gagarine/temporaires/zli/Master-internship-repo-at-Institut-dAlembert
+prefix=/home/zli2022/Master-internship-repo-at-Institut-dAlembert
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
