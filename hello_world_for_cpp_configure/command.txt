@@ -1,0 +1,2 @@
+g++ -o fftw test_for_fftw.cc -I$FFTW_DIR/include -L$FFTW_DIR/lib -lfftw3
+
