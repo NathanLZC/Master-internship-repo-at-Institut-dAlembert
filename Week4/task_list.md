@@ -1,0 +1,3 @@
+- fix week3 notebook
+- random surface script
+- C++ start-up, *FFTW*
