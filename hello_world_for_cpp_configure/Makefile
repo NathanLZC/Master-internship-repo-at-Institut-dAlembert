@@ -1,7 +1,5 @@
 # compilation flag for optimized (Release mode)
 CXXFLAGS = -O3 -fopenmp -DNDEBUG -std=c++17 -Wfatal-errors 
-# compilation flag for debug mode. To use comment the above line and uncomment the line below
-#CXXFLAGS = -g -DNDEBUG -std=c++11 -Wfatal-errors
 
 # BLASLIB is the flag to link with your BLAS implementation. below is the default: the system bls lib. 
 BLASLIB = -lblas
@@ -24,35 +22,41 @@ FFTW_DIR=/gagarine/temporaires/zli/fftw
 
 # this list all the executable that will be build when typing make
 #all: dmatrix_dense_examples test_prod_blas test_prod_openblas
-all:
+all: fftw
 
-
-# this are the rule to compile the library file that Igave you (mmio.cpp and dmatrix_denseCM.cpp)
-dmatrix_denseCM.o : Makefile dmatrix_denseCM.cpp mmio.o mmio.h dmatrix_denseCM.h
-	$(CXX) $(CXXFLAGS) -c dmatrix_denseCM.cpp
-
-mmio.o :  Makefile mmio.cpp mmio.h
-	$(CXX) $(CXXFLAGS) -c mmio.cpp	
-
-dmatrix_dense_examples.o : Makefile dmatrix_dense_examples.cpp dmatrix_denseCM.h mmio.h
-	$(CXX) $(CXXFLAGS) -c dmatrix_dense_examples.cpp
-
-dmatrix_dense_examples : Makefile dmatrix_dense_examples.o dmatrix_denseCM.o mmio.o
-	$(CXX) $(CXXFLAGS) dmatrix_dense_examples.o dmatrix_denseCM.o mmio.o $(OPENBLASLIB) -o dmatrix_dense_examples
-
-
-main.o : Makefile main.cpp dmatrix_denseCM.h mmio.h
-	$(CXX) $(CXXFLAGS) -c main.cpp
-
-
-test_prod_blas : Makefile main.o dmatrix_denseCM.o mmio.o
-	$(CXX) $(CXXFLAGS) main.o dmatrix_denseCM.o mmio.o $(BLASLIB) -o test_prod_blas
-
-test_prod_openblas : Makefile main.o dmatrix_denseCM.o mmio.o
-	$(CXX) $(CXXFLAGS) main.o dmatrix_denseCM.o mmio.o $(OPENBLASLIB) -o test_prod_openblas
+fftw : Makefile test_for_fftw.cc
+	$(CXX) $(CXXFLAGS) -o fftw test_for_fftw.cc -I$(FFTW_DIR)/include -L$(FFTW_DIR)/lib -lfftw3
 
 clean:
 	rm *.o
-	rm dmatrix_dense_examples test_prod_blas test_prod_openblas
+	rm fftw
+
+# this are the rule to compile the library file that Igave you (mmio.cpp and dmatrix_denseCM.cpp)
+#dmatrix_denseCM.o : Makefile dmatrix_denseCM.cpp mmio.o mmio.h dmatrix_denseCM.h
+#	$(CXX) $(CXXFLAGS) -c dmatrix_denseCM.cpp
+#
+#mmio.o :  Makefile mmio.cpp mmio.h
+#	$(CXX) $(CXXFLAGS) -c mmio.cpp	
+
+#dmatrix_dense_examples.o : Makefile dmatrix_dense_examples.cpp dmatrix_denseCM.h mmio.h
+#	$(CXX) $(CXXFLAGS) -c dmatrix_dense_examples.cpp
+
+#dmatrix_dense_examples : Makefile dmatrix_dense_examples.o dmatrix_denseCM.o mmio.o
+#	$(CXX) $(CXXFLAGS) dmatrix_dense_examples.o dmatrix_denseCM.o mmio.o $(OPENBLASLIB) -o dmatrix_dense_examples
+
+
+#main.o : Makefile main.cpp dmatrix_denseCM.h mmio.h
+#	$(CXX) $(CXXFLAGS) -c main.cpp
+
+
+#test_prod_blas : Makefile main.o dmatrix_denseCM.o mmio.o
+#	$(CXX) $(CXXFLAGS) main.o dmatrix_denseCM.o mmio.o $(BLASLIB) -o test_prod_blas
+
+#test_prod_openblas : Makefile main.o dmatrix_denseCM.o mmio.o
+#	$(CXX) $(CXXFLAGS) main.o dmatrix_denseCM.o mmio.o $(OPENBLASLIB) -o test_prod_openblas
+
+#clean:
+#	rm *.o
+#	rm dmatrix_dense_examples test_prod_blas test_prod_openblas
 
 
