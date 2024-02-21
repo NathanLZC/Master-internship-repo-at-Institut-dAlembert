@@ -15,8 +15,28 @@ find_library(FFTW_LIBRARY NAMES fftw3 PATHS "${FFTW_DIR}/lib" NO_DEFAULT_PATH)
 include_directories("${FFTW_DIR}/include")
 
 # 定义目标可执行文件和相关源文件
-add_executable(fftw test_for_fftw.cc)
+#add_executable(fftw test_for_fftw.cc)
 
 # 链接FFTW库到目标可执行文件
 target_link_libraries(fftw ${FFTW_LIBRARY})
+
+
+# Function that helps copy input files for milestones
+function(add_input_file milestone input_file)
+  add_custom_command(
+    TARGET ${milestone} POST_BUILD
+    DEPENDS ${input_file}
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/${input_file}
+    $<TARGET_FILE_DIR:${milestone}>
+  )
+endfunction()
+
+add_subdirectory(01)
+
+# Future cpp directory
+# add_subdirectory(04)
+# add_subdirectory(07)
+# add_subdirectory(08)
+# add_subdirectory(09)
 
