@@ -2,7 +2,9 @@
 
 ## Fluage et surfaces rugueuses : évolution du contact entre matériaux viscoélastiques
 
-A brief description of your thesis project goes here. Explain the problem you're addressing, the hypothesis or research questions you're exploring, and the significance of your work.
+We are aiming to design a solver for evolution of the contact between two random rough viscoelastic surfaces. If possible, we want to continue developing with wavelet method. This repo records our development workflow.
+
+### Key word: FFT, Boundary element method, Viscoelastic, contact mechanics
 
 ## Getting Started
 
@@ -10,17 +12,13 @@ These instructions will help you get a copy of the project up and running on you
 
 ### Prerequisites
 
-What things you need to install the software and how to install them. Since you mentioned Python version, let's specify that:
+This project is mainly based on Python and C++, the notebooks in */Weekn* contain theory background for contact mechanics. The python version is:
 
 ```bash
 Python 3.10.6 64-bit
 ```
 
 ### Installing
-
-A step-by-step series of examples that tell you how to get a development environment running.
-
-Say what the step will be, for example:
 
 1. **Clone the repo**
 
@@ -42,11 +40,11 @@ Make sure you have `pip` installed and then run:
 pip install -r requirements.txt
 ```
 
-This command will install all the dependencies listed in your `requirements.txt` file.
-
 ## Running the tests
 
-Explain how to run the automated tests for this system (if applicable).
+### For .py and .ipynb files, we strongly recommand to use VS code.
+### For .cc/.cpp files, we rely on Makefile and CMake
+
 
 ## Requirement libraries
 ### FFTW
@@ -55,19 +53,11 @@ Explain how to run the automated tests for this system (if applicable).
 ## Streamlit
 
 
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system (if applicable).
-
 ## Built With
 
 * [Python](https://www.python.org/downloads/release/python-3106/) - The programming language used.
-* [Other Libraries/Frameworks](#) - Any other libraries or frameworks used.
-
-## Contributing
-
-Please read [CONTRIBUTING.md](#) for details on our code of conduct, and the process for submitting pull requests to us.
+* [C++](#) - Any other libraries or frameworks used.
+* [FFTW]() - 
 
 ## Authors
 
@@ -75,7 +65,7 @@ Please read [CONTRIBUTING.md](#) for details on our code of conduct, and the pro
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the CC0-1.0 License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 
