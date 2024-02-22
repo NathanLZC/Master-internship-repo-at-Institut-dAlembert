@@ -50,14 +50,15 @@ pip install -r requirements.txt
 ### FFTW
 
 
+
 ## Streamlit
 
 
 ## Built With
 
-* [Python](https://www.python.org/downloads/release/python-3106/) - The programming language used.
-* [C++](#) - Any other libraries or frameworks used.
-* [FFTW]() - 
+* [Python](https://www.python.org/downloads/release/python-3106/) - The main language used
+* [C++](https://cplusplus.com/) - The main language used
+* [FFTW](https://www.fftw.org/) - A fast, free C FFT library; includes real-complex, multidimensional, and parallel transforms.
 
 ## Authors
 
