@@ -52,6 +52,10 @@ Explain how to run the automated tests for this system (if applicable).
 ### FFTW
 
 
+## Streamlit
+
+
+
 ## Deployment
 
 Add additional notes about how to deploy this on a live system (if applicable).
@@ -65,15 +69,9 @@ Add additional notes about how to deploy this on a live system (if applicable).
 
 Please read [CONTRIBUTING.md](#) for details on our code of conduct, and the process for submitting pull requests to us.
 
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/yourusername/your-repository-name/tags).
-
 ## Authors
 
-* **Zichen Li** - *Initial work* - [YourUsername](https://github.com/YourUsername)
-
-See also the list of [contributors](https://github.com/yourusername/your-repository-name/contributors) who participated in this project.
+* **Zichen Li** - *Initial work* - [NathanLZC](https://github.com/YourUsername)
 
 ## License
 
