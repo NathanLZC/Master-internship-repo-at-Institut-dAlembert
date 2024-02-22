@@ -74,6 +74,14 @@ make[1] : on quitte le répertoire « /gagarine/temporaires/zli/openmpi-5.0.2/
 make: *** [Makefile:1533 : all-recursive] Erreur 1
 ```
 
+## Update 22/02/2024
+
+I use CMake extension on the left bar, and it automatic generate a build folder that contains a series of CMake files(look powerful).
+
+I also tried Makefile that I am familier with in ECN couse DDIS. Luckily, Makefile always work, it seems more suitable for large project, especially for linking excutable files in different steps.
+
+So, are Makefile, CMake, CMakelists.txt different solutions, which one is better? I want to handle them all.
+
 ### Reference:
 
 [1] https://code.visualstudio.com/docs/cpp/config-linux
