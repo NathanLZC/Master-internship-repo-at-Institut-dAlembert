@@ -8,12 +8,14 @@ since we can generate a random surface, I would like to use this random surface 
 
 In this step, we can flat and rondom rough surfaces, domain decomposition and mpi?
 
-![]()
-![]()
+![](figures/Solid-model-with-rough-surface.png)
+![](figures/Schematic-diagram-of-contact-between-rough-surface-and-rigid-smooth-surface_W640.jpg)
 
 But it sounds too trivally, the random surface that we generate will have "mountains" and "vallies", how could we analysis its deformation, how can we track its deformation? And not all surfaces have simple "uniformly" parabolic configuration, some may show adhesive behavior.
 
 is this volume integral??
+
+![volume](figures/Contact-diagram-of-smooth-plane-and-rough-surface_W640.jpg)
 
 dynamic approching for two rough surfaces? Or they are already contact then we apply loading and see its evolution?
 
