@@ -8,14 +8,14 @@ C = 1 # represents phi_0
 q_l = 2*np.pi/L
 q_r = 2*np.pi/L
 q_s = 2*np.pi*25/L
-H = 0.8 # Hurst exponent, just as an example
+H = 0.8 # Hurst exponent, represents the roughness of the surface
 
 # Defining the piecewise function
 def phi(q):
     if q_l <= q < q_r:
         return C
     elif q_r <= q < q_s:
-        return C * (q / q_r) ** (-2 * (H + 1))
+        return C * q ** (-2 * (H + 1))
     else:
         return 0
 
@@ -28,7 +28,7 @@ q_x = 2 * np.pi * np.fft.fftfreq(n, d=L/n)
 q_y = 2 * np.pi * np.fft.fftfreq(m, d=L/m)
 #QX, QY = np.meshgrid(q_x, q_y)
 
-q_values = q_values = np.logspace(np.log10(q_l/10), np.log10(q_s*10), 500)#just as an example, we will overload the range of q values later
+q_values = np.logspace(np.log10(q_l/10), np.log10(q_s*10), 500)#just as an example, we will overload the range of q values later
 
 
 
