@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # 导入FFTW库
 set(FFTW_DIR "/gagarine/temporaires/zli/fftw")
+set(OpenBLAS_DIR "/gagarine/temporaires/zli/OpenBLAS")
 #find_library(FFTW_LIBRARY NAMES fftw3 PATHS "${FFTW_DIR}/lib" NO_DEFAULT_PATH)
 
 # 添加包含目录
