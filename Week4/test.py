@@ -11,15 +11,6 @@ q_s = 2*np.pi*25/L
 H = 0.8 # Hurst exponent, represents the roughness of the surface
 
 # Defining the piecewise function
-'''
-def phi(q):
-    if q_l <= q < q_r:
-        return C
-    elif q_r <= q < q_s:
-        return C * q ** (-2 * (H + 1))
-    else:
-        return 0
-'''
 def phi(q):
     # Initialize the result with zeros
     result = np.zeros_like(q)
