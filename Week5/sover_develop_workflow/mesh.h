@@ -4,9 +4,8 @@
 
 #include <iostream>
 #include <cmath>
-#include <vector>
-#include <algorithm> // for std::max
-#include <ctime>
+#include <fftw3.h>
+#include <omp.h>
 
 
 

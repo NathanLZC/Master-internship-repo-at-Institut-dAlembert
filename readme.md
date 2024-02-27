@@ -61,6 +61,7 @@ pip install -r requirements.txt
 * [Python](https://www.python.org/downloads/release/python-3106/) - The main language used
 * [C++](https://cplusplus.com/) - The main language used
 * [FFTW](https://www.fftw.org/) - A fast, free C FFT library; includes real-complex, multidimensional, and parallel transforms.
+* [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) - A high-level C++ library of template headers for linear algebra, matrix and vector operations, geometrical transformations, numerical solvers and related algorithms.
 
 ## Authors
 

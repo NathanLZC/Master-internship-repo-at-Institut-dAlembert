@@ -10,10 +10,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # 导入FFTW库
 set(FFTW_DIR "/gagarine/temporaires/zli/fftw")
 set(OpenBLAS_DIR "/gagarine/temporaires/zli/OpenBLAS")
+set(Eigen_DIR "/gagarine/temporaires/zli/eigen-3.4.0")
 #find_library(FFTW_LIBRARY NAMES fftw3 PATHS "${FFTW_DIR}/lib" NO_DEFAULT_PATH)
 
-# 添加包含目录
-include_directories("${FFTW_DIR}/include" "${OpenBLAS_DIR}/include")
+# 添加包含目录#eigen is a header only library, so no need to link it
+include_directories("${FFTW_DIR}/include" "${OpenBLAS_DIR}/include" "${Eigen_DIR}")
 link_directories("${FFTW_DIR}/lib" "${OpenBLAS_DIR}/lib")
 link_libraries(fftw3 openblas)
 
