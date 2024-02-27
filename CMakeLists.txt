@@ -13,9 +13,9 @@ set(OpenBLAS_DIR "/gagarine/temporaires/zli/OpenBLAS")
 #find_library(FFTW_LIBRARY NAMES fftw3 PATHS "${FFTW_DIR}/lib" NO_DEFAULT_PATH)
 
 # 添加包含目录
-include_directories("${FFTW_DIR}/include")
-link_directories("${FFTW_DIR}/lib")
-link_libraries(fftw3)
+include_directories("${FFTW_DIR}/include" "${OpenBLAS_DIR}/include")
+link_directories("${FFTW_DIR}/lib" "${OpenBLAS_DIR}/lib")
+link_libraries(fftw3 openblas)
 
 # 定义目标可执行文件和相关源文件
 add_executable(our_test hello_world_for_cpp_configure/test_for_fftw.cc)

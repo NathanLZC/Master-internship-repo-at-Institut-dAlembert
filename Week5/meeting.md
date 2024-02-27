@@ -59,6 +59,11 @@ cmake -DCMAKE_BUILD_TYPE=Debug ..
 ```
 where *-D* for 'define'
 
+here are some link to enhance our understanding:
+(https://cmake.org/cmake/help/v3.0/command/link_directories.html)
+(https://cmake.org/cmake/help/latest/command/find_package.html)
+
+
 [5] try to define a class for accessing 2-D array in C++(guard block for head file)
     compare/call library mdspan: [https://github.com/kokkos/mdspan](require C++ 23)
                                  [https://godbolt.org/]
