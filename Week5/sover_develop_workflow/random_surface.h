@@ -2,6 +2,9 @@
 #ifndef RANDOM_SURFACE_H
 #define RANDOM_SURFACE_H
 
+#include "matrix_access.h"
+
+
 
 
 
