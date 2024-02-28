@@ -131,8 +131,6 @@ double alphavalue(double* P, double W, double alpha) {
 
 double findAlpha0(double* P, double W, double alpha_l, double alpha_r, double tol) {
 
-
-
     // Expanding the search range if alpha_l and alpha_r do not bound a root
     while (sign(alphavalue(alpha_l)) == sign(alphavalue(alpha_r))) {
         alpha_r *= 2;

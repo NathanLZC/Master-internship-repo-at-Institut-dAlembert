@@ -54,7 +54,7 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
     
     # check if a and b bound a root
     def f(alpha):
-        return np.mean(P + alpha) - W
+        return np.mean(P + alpha) - W/S
 
     while np.sign(f(alpha_l)) == np.sign(f(alpha_r)):
         alpha_r *= 2

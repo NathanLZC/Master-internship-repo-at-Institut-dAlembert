@@ -19,7 +19,8 @@ link_directories("${FFTW_DIR}/lib" "${OpenBLAS_DIR}/lib")
 link_libraries(fftw3 openblas)
 
 # 定义目标可执行文件和相关源文件
-add_executable(our_test hello_world_for_cpp_configure/test_for_fftw.cc)
+#add_executable(our_test hello_world_for_cpp_configure/test_for_fftw.cc)
+add_executable(test_eigen Week5/test_eigen.cc)
 
 # 链接FFTW库到目标可执行文件
 #target_link_libraries(our_test fftw3)
