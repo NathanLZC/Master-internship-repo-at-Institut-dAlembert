@@ -22,7 +22,7 @@ const int iter_max = 10000; // Maximum number of iterations
 void generateMesh(double* x, double* y, int n, int m, double L);
 void updatePressure(fftw_complex* P, fftw_complex* G, double* h_matrix, int n, int m, double alpha_0);
 double alphavalue(double* P, double* G, double alpha);
-double findAlpha0(double* P, double W, double S, double alpha_l, double alpha_r, double tol, int n, int m);
+double findAlpha0(double* P, double W, double alpha_l, double alpha_r, double tol);
 
 int main() {
     // Allocate memory for mesh grids, pressure, and displacement arrays
@@ -109,13 +109,16 @@ void updatePressure(fftw_complex* P, fftw_complex* G, double* h_matrix, int n, i
 
 //need to accelerate this function
 double mean(const double* arr, double n) {
-    double sum = 0.0;
-    for(int i = 0; i < n; ++i) {
-        sum += arr[i];
-    }
-    return sum / n;
+
+    /*
+    
+    
+    */
+
+    return (arr + n) / 2;
 }
 
+//sign function
 int sign(double value) {
     return (value > 0) - (value < 0);
 }
@@ -126,7 +129,7 @@ double alphavalue(double* P, double W, double alpha) {
     return mean(P + alpha) - W;
 }
 
-double findAlpha0(double* P, double W, double S, double alpha_l, double alpha_r, double tol, int n, int m) {
+double findAlpha0(double* P, double W, double alpha_l, double alpha_r, double tol) {
     // Implementation of finding alpha_0 is omitted for brevity
 
 

@@ -8,7 +8,7 @@
 #include <algorithm> // for std::max
 #include <ctime>
 
-#include "matrix_access.h"
+#include "mesh.h"
 #include "random_surface.h"
 #include "iterative_solver.h"
 

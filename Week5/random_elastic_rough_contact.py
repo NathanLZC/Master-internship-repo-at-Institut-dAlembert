@@ -14,23 +14,72 @@ nu = 0.3  # Poisson's ratio
 E_star = E / (1 - nu**2)  # Plane strain modulus
 
 # Generate a 2D coordinate space
-n = 100
-m = 100
-x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))
+n = 300
+m = 300
+#x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))
 
 x0 = 1
 y0 = 1
 
-# Define the separation h
-h_matrix = - ((x-x0)**2 + (y-y0)**2) / (2 * R)
+#################################################
+#####Generate random rough surface ##############
+#################################################
 
-# Initial pressure distribution
-P = np.full((n, m), W / S)  # Initial guess for the pressure
+# Constants for the piecewise function
+C = 1 # represents phi_0
+q_l = 2*np.pi/L
+q_r = 2*np.pi/L
+q_s = 2*np.pi*25/L
+H = 0.8 # Hurst exponent, represents the roughness of the surface
 
-# Frequency components for the Fourier transform
+# Defining the piecewise function
+def phi(q):
+    # Initialize the result with zeros
+    result = np.zeros_like(q)
+    
+    # Apply conditions
+    mask1 = (q_l <= q) & (q < q_r)  # Condition for C
+    mask2 = (q_r <= q) & (q < q_s)  # Condition for the power-law decay
+    
+    result[mask1] = C
+    result[mask2] = C * (q[mask2] / q_r) ** (-2 * (H + 1))
+    
+    return result
+
+#we define the frequency with q_x and q_y
 q_x = 2 * np.pi * np.fft.fftfreq(n, d=L/n)
 q_y = 2 * np.pi * np.fft.fftfreq(m, d=L/m)
 QX, QY = np.meshgrid(q_x, q_y)
+
+q_values = np.sqrt(QX**2 + QY**2)
+
+phi_values = phi(q_values)
+
+# Generate random phase
+gen = np.random.default_rng()
+theta = gen.uniform(0, 2*np.pi, size=phi_values.shape)
+
+# Generate white noise and apply PSD and phase
+white_noise = gen.normal(size=phi_values.shape)
+fft_noise = np.fft.fft2(white_noise)
+filtered_noise = fft_noise * np.sqrt(phi_values) #* np.exp(1j * theta)
+surface = np.fft.ifft2(filtered_noise).real
+
+# Plotting
+plt.figure(figsize=(10, 8))
+plt.imshow(surface, cmap='viridis')
+plt.colorbar()
+plt.title("Synthesized Rough Surface")
+plt.show()
+
+#######################################################################
+###Compute pressure and displacement with generated surface ###########
+#######################################################################
+
+h_profile = surface
+
+# Initial pressure distribution
+P = np.full((n, m), W / S)  # Initial guess for the pressure
 
 # Define the kernel in the Fourier domain
 kernel_fourier = np.zeros_like(QX)
@@ -42,8 +91,6 @@ tol = 1e-6  # Tolerance for convergence
 iter_max = 10000  # Maximum number of iterations
 k = 0  # Iteration counter
 error = np.inf  # Initialize error
-
-
 
 
 def find_alpha_0(P, W, alpha_l, alpha_r, tol):
@@ -80,8 +127,9 @@ while np.abs(error) > tol and k < iter_max:
     # Calculate the gradient G in the Fourier domain and transform it back to the spatial domain
     P_fourier = np.fft.fft2(P, norm='ortho')
     G_fourier = P_fourier * kernel_fourier
-    G = np.fft.ifft2(G_fourier, norm='ortho').real - h_matrix
-    
+    G = np.fft.ifft2(G_fourier, norm='ortho').real - h_profile
+
+
     # Update P by subtracting G
     P = P - G
     
@@ -108,18 +156,7 @@ G = G - np.min(G)
 displacement_fourier = P_fourier * kernel_fourier
 displacement = np.fft.ifft2(displacement_fourier, norm='ortho').real
 
-
-
-'''
-# Plot the results
-import matplotlib.pyplot as plt
-plt.imshow(displacement, cmap='jet', origin='lower', extent=[0, L, 0, L])
-plt.colorbar(label='Displacement (u_z)')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('Displacement Field')
-plt.show()
-'''
+# Plot the pressure field
 plt.imshow(P, cmap='viridis', origin='lower', extent=[0, L, 0, L])
 plt.colorbar(label='Pressure (P)')
 plt.xlabel('x')
@@ -127,89 +164,10 @@ plt.ylabel('y')
 plt.title('Pressure Field')
 plt.show()
 
-
-
-#######################################################
-## The following is the code for week 2, hertz solution
-#######################################################
-
-
-import matplotlib.pyplot as plt
-
-F_value = 1e2 
-
-# We define the radius of the elastic sphere as R
-R = 1
-
-#define material parameters
-E = 1e3  # Young's modulus
-nu = 0.3  # Poisson's ratio
-E_star = E / (1 - nu**2)  # plane strain modulus 
-
-# We define the half-space domain is L^2
-L = 2
-
-#We generate a 2D coordinate space
-#n = 100
-#m = 100
-'''
-x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))#notice here that we use endpoint=False to avoid having the last point
-'''
-x0 = 1
-y0 = 1
-
-# We define the distance from the center of the sphere
-r = np.sqrt((x-x0)**2 + (y-y0)**2)
-
-#Here we define p0 as the reference pressure
-p0 = (6*F_value*E_star**2/(np.pi**3*R**2))**(1/3)
-a = (3*F_value*R/(4*E_star))**(1/3)
-
-u_z = -(r**2)/(2*R)
-
-# Correctly applying the displacement outside the contact area
-outside_contact = r > a
-u_z_outside = -(r[outside_contact]**2)/(2*R) + a * np.sqrt(r[outside_contact]**2 - a**2)/(np.pi*R) + (r[outside_contact]**2-2*a**2)*np.arccos(a/r[outside_contact])/(np.pi*R)
-u_z[outside_contact] = u_z_outside
-
-#plot u_z
-plt.imshow(u_z, cmap='viridis', origin='lower', extent=[0, L, 0, L])
+# Plot the displacement field
+plt.imshow(displacement, cmap='viridis', origin='lower', extent=[0, L, 0, L])
 plt.colorbar(label='Displacement (u_z)')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.title('Displacement Field')
-plt.show()
-
-
-
-
-
-#######################################################
-## The following is comparasion of the two solutions
-#######################################################
-
-
-
-from mpl_toolkits.mplot3d import Axes3D
-
-# Calculate the error between the real part of the displacement obtained through FFT and the analytical solution
-error = np.abs(displacement - np.max(displacement) - u_z)
-
-# Create a 3D plot
-fig = plt.figure(figsize=(10, 8))
-ax = fig.add_subplot(111, projection='3d')
-
-# Create a surface plot of the error
-X, Y = np.meshgrid(np.linspace(0, L, n), np.linspace(0, L, m))
-surf = ax.plot_surface(X, Y, error, cmap='viridis', edgecolor='none')
-
-# Add a color bar which maps values to colors
-fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5)
-
-# Labels and title
-ax.set_xlabel('X axis')
-ax.set_ylabel('Y axis')
-ax.set_zlabel('Error')
-ax.set_title('Error between Analytical and Fourier Method Displacement')
-
 plt.show()
