@@ -67,10 +67,10 @@ surface = np.fft.ifft2(filtered_noise).real
 
 # Plotting
 plt.figure(figsize=(10, 8))
-plt.imshow(surface, cmap='viridis')
+plt.imshow(surface, cmap='viridis', origin='lower', extent=[0, L, 0, L])
 plt.colorbar()
 plt.title("Synthesized Rough Surface")
-plt.show()
+#plt.show()
 
 #######################################################################
 ###Compute pressure and displacement with generated surface ###########
@@ -101,7 +101,7 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
     
     # check if a and b bound a root
     def f(alpha):
-        return np.mean(P + alpha) - W
+        return np.mean(P + alpha) - W/S
 
     while np.sign(f(alpha_l)) == np.sign(f(alpha_r)):
         alpha_r *= 2
@@ -157,14 +157,15 @@ displacement_fourier = P_fourier * kernel_fourier
 displacement = np.fft.ifft2(displacement_fourier, norm='ortho').real
 
 # Plot the pressure field
+plt.figure(figsize=(10, 8))
 plt.imshow(P, cmap='viridis', origin='lower', extent=[0, L, 0, L])
 plt.colorbar(label='Pressure (P)')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.title('Pressure Field')
-plt.show()
 
 # Plot the displacement field
+plt.figure(figsize=(10, 8))
 plt.imshow(displacement, cmap='viridis', origin='lower', extent=[0, L, 0, L])
 plt.colorbar(label='Displacement (u_z)')
 plt.xlabel('x')
