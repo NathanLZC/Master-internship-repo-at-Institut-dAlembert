@@ -1,15 +1,8 @@
-//guard block
-#ifndef ELASTIC_H
-#define ELASTIC_H
+#ifndef ELASTIC_TPP
+#define ELASTIC_TPP
 
-#include <iostream>
-#include <cmath>
-#include <fftw3.h>
 #include <omp.h>
-
-template<typename T>
-void generateMesh(T* x, T* y, T* h_matrix, int n, int m, T L);
-
+//implement the function template
 template<typename T>
 void generateMesh(T* x, T* y, T* h_matrix, int n, int m, T L) {
     T dx = L / (n - 1);
@@ -25,6 +18,4 @@ void generateMesh(T* x, T* y, T* h_matrix, int n, int m, T L) {
     }
 }
 
-//#include "mesh.tpp"//why this template is not working
-
-#endif // ELASTIC_H
+#endif // ELASTIC_TPP
