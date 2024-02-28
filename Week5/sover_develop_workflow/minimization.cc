@@ -3,7 +3,9 @@
 #include <cmath>
 #include <vector>
 #include <algorithm> // for std::max
+#include <numeric> // for std::accumulate
 #include <omp.h>
+#include <Eigen/Dense>
 
 // Define constants
 const double W = 1e2; // Total load
@@ -36,6 +38,7 @@ int main() {
     generateMesh(x, y, n, m, L);
 
     // Define the separation h_matrix and initial pressure distribution P
+    #pragma omp parallel for collapse(2)
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < m; ++j) {
             int index = i * m + j;
@@ -45,6 +48,10 @@ int main() {
             P[index][1] = 0.0; // Imaginary part
         }
     }
+
+    //Generate the kernel
+
+
 
     // FFTW plans
     fftw_plan p_forward = fftw_plan_dft_2d(n, m, P, P, FFTW_FORWARD, FFTW_ESTIMATE);
@@ -60,6 +67,8 @@ int main() {
         // Apply the kernel in Fourier domain and perform inverse FFT
         // Note: Actual implementation of multiplying with the kernel and handling of G is omitted for brevity
         fftw_execute(p_backward);
+
+
 
         // Update P and ensure non-negativity
         // Note: The function updatePressure should adjust P based on G and other criteria
@@ -101,28 +110,28 @@ void generateMesh(double* x, double* y, int n, int m, double L) {
 
 }
 
-void updatePressure(fftw_complex* P, fftw_complex* G, double* h_matrix, int n, int m, double alpha_0) {
+void updatePressure(fftw_complex* P, fftw_complex* G, double alpha_0) {
     // Implementation of pressure update is omitted for brevity
 
 
 }
 
 //need to accelerate this function
-double mean(const double* arr, double n) {
-
-    /*
-    
-    
-    */
-
-    return (arr + n) / 2;
+template<typename T>
+double mean(const std::vector<T>& v, double n) {
+    T sum = std::accumulate(v.begin(), v.end(), T(0)) + n * v.size();
+    return sum / static_cast<double>(v.size());
 }
 
 //sign function
-int sign(double value) {
-    return (value > 0) - (value < 0);
+template<typename T>
+std::vector<int> sign(const std::vector<T>& v) {
+    std::vector<int> signs(v.size());
+    for(size_t i = 0; i < v.size(); ++i) {
+        signs[i] = (v[i] > T(0)) - (v[i] < T(0));
+    }
+    return signs;
 }
-
 
 double alphavalue(double* P, double W, double alpha) {
     // Implementation of finding alpha value is omitted for brevity     
