@@ -130,10 +130,26 @@ double alphavalue(double* P, double W, double alpha) {
 }
 
 double findAlpha0(double* P, double W, double alpha_l, double alpha_r, double tol) {
-    // Implementation of finding alpha_0 is omitted for brevity
 
 
 
+    // Expanding the search range if alpha_l and alpha_r do not bound a root
+    while (sign(alphavalue(alpha_l)) == sign(alphavalue(alpha_r))) {
+        alpha_r *= 2;
+        // Optionally, you could throw an exception or handle the error if bounds are incorrect
+    }
+
+    // Midpoint
+    double alpha_c = (alpha_l + alpha_r) / 2.0;
+
+    // Checking if the midpoint satisfies the tolerance condition
+    if (std::abs(alphavalue(alpha_c)) < tol) {
+        return alpha_c;
+    } else if (sign(alphavalue(alpha_l)) == sign(alphavalue(alpha_c))) {
+        return findAlpha0(P, W, alpha_c, alpha_r, tol); // Narrowing the search to the right half
+    } else {
+        return findAlpha0(P, W, alpha_l, alpha_c, tol); // Narrowing the search to the left half
+    }
 
 
     return 0.0;
