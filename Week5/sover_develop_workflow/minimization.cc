@@ -24,7 +24,8 @@ const int iter_max = 10000; // Maximum number of iterations
 void generateMesh(double* x, double* y, int n, int m, double L);
 void updatePressure(fftw_complex* P, fftw_complex* G, double* h_matrix, int n, int m, double alpha_0);
 double alphavalue(double* P, double* G, double alpha);
-double findAlpha0(double* P, double W, double alpha_l, double alpha_r, double tol);
+template<typename T>
+double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol);
 
 int main() {
     // Allocate memory for mesh grids, pressure, and displacement arrays
@@ -72,7 +73,7 @@ int main() {
 
         // Update P and ensure non-negativity
         // Note: The function updatePressure should adjust P based on G and other criteria
-        double alpha_0 = findAlpha0(reinterpret_cast<double*>(P), W, S, -1e2, 1e2, tol, n, m);
+        double alpha_0 = findAlpha0(P , W, S, -1e2, 1e2, tol, n, m);
         updatePressure(P, G, h_matrix, n, m, alpha_0);
 
         // Increment the iteration counter
@@ -118,7 +119,7 @@ void updatePressure(fftw_complex* P, fftw_complex* G, double alpha_0) {
 
 //need to accelerate this function
 template<typename T>
-double mean(const std::vector<T>& v, double n) {
+double mean(std::vector<T>& v, double n) {
     T sum = std::accumulate(v.begin(), v.end(), T(0)) + n * v.size();
     return sum / static_cast<double>(v.size());
 }
@@ -133,12 +134,14 @@ std::vector<int> sign(const std::vector<T>& v) {
     return signs;
 }
 
-double alphavalue(double* P, double W, double alpha) {
+template<typename T>
+double alphavalue(std::vector<T>& P, double W, double alpha) {
     // Implementation of finding alpha value is omitted for brevity     
-    return mean(P + alpha) - W;
+    return mean(P, alpha) - W;
 }
 
-double findAlpha0(double* P, double W, double alpha_l, double alpha_r, double tol) {
+template<typename T>
+double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol) {
 
     // Expanding the search range if alpha_l and alpha_r do not bound a root
     while (sign(alphavalue(alpha_l)) == sign(alphavalue(alpha_r))) {

@@ -51,6 +51,16 @@ pip install -r requirements.txt
 
 ### Eigen
 
+With CMakeLists.txt, we can specify the location of the Eigen library. On the system that we have full access to, we can also use the following way to configure a global environment for Eigen:
+
+First, download the required version of Eigen from Eigen's [official website](http://eigen.tuxfamily.org/) or its [GitLab repository](https://gitlab.com/libeigen/eigen). Take `eigen-3.4.0.tar.gz` as an example:
+
+Then use the following code to decompress and create a symbolic link:
+```bash
+tar -xzf eigen-3.4.0.tar.gz -C /home/username
+sudo ln -s /path/to/eigen-3.4.0/Eigen /usr/local/include/Eigen
+```
+
 ### mdspan for C++23
 
 ## Streamlit
