@@ -3,17 +3,20 @@
 #include <vector>
 #include <algorithm> // for std::max
 #include <numeric> // for std::accumulate
-#include <fftw3.h>
+#include </gagarine/temporaires/zli/fftw/include/fftw3.h>
 #include <omp.h>
-#include <Eigen/Dense>
+#include </gagarine/temporaires/zli/eigen-3.4.0/Eigen/Dense>
 #include <fstream> // for std::ofstream
 
 
 // Function to generate meshgrid equivalent in C++
 void GenerateMeshgrid(Eigen::MatrixXd& x, Eigen::MatrixXd& y, double L, int n, int m);
 
+// Function to generate the meshgrid in Fourier space
+void GenerateFrequencyMeshgrid(Eigen::MatrixXd& q_x, Eigen::MatrixXd& q_y, double L, int n, int m);
+
 // Function to define the piecewise function phi(q)
-Eigen::VectorXd phi(const Eigen::VectorXd& q, double L, double H);
+Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double L, double H);
 
 // Function to generate random phase and white noise
 void GenerateRandomSurface(Eigen::MatrixXd& surface, const Eigen::VectorXd& q_x, const Eigen::VectorXd& q_y, int n, int m);
@@ -37,12 +40,30 @@ void GenerateMeshgrid(Eigen::MatrixXd& x, Eigen::MatrixXd& y, double L, int n, i
     }
 }
 
-Eigen::VectorXd phi(const Eigen::VectorXd& q, double L, double H) {
-    double C = 1.0; // represents phi_0
+void GenerateFrequencyMeshgrid(Eigen::MatrixXd& Q_x, Eigen::MatrixXd& Q_y, double L, int n, int m) {
+   
+}
+
+// Implementation of function to define the piecewise function phi(q)
+Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double L, double H) {
+    double C = phi_0; // represents phi_0
     double q_l = 2.0 * M_PI / L;
-    double q_r = 2.0 * M_PI / H;
+    double q_r = 2.0 * M_PI / L;
     double q_s = 2.0 * M_PI * 25.0 / L;
     double H = 0.8;
+
+    Eigen::MatrixXd result(q.rows(), q.cols());
+
+    #pragma omp parallel for collapse(2)
+    for(int i = 0; i < q.rows(); ++i) {
+        for (int j = 0; j < q.cols(); ++j){
+
+        }
+    }
+
+
+
+
 
 
 
