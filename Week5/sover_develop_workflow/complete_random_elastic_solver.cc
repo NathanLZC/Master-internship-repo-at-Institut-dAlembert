@@ -37,6 +37,20 @@ void GenerateMeshgrid(Eigen::MatrixXd& x, Eigen::MatrixXd& y, double L, int n, i
     }
 }
 
+Eigen::VectorXd phi(const Eigen::VectorXd& q, double L, double H) {
+    double C = 1.0; // represents phi_0
+    double q_l = 2.0 * M_PI / L;
+    double q_r = 2.0 * M_PI / H;
+    double q_s = 2.0 * M_PI * 25.0 / L;
+    double H = 0.8;
+
+
+
+
+
+
+}
+
 
 //need to accelerate this function
 template<typename T>
@@ -56,7 +70,7 @@ std::vector<int> sign(const std::vector<T>& v) {
 }
 
 void GenerateRandomSurface(Eigen::MatrixXd& surface, const Eigen::VectorXd& q_x, const Eigen::VectorXd& q_y, int n, int m){
-    
+
 
 
 
