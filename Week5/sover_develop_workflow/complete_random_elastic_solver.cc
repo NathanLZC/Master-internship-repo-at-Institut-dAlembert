@@ -10,16 +10,19 @@
 
 
 // Function to generate meshgrid equivalent in C++
-void GenerateMeshgrid(Eigen::MatrixXd& x, Eigen::MatrixXd& y, double L, int n, int m);
+void GenerateMeshgrid(Eigen::VectorXd& x, Eigen::VectorXd& y,Eigen::MatrixXd& X, Eigen::MatrixXd& Y, double L, int n, int m);
 
 // Function to realize numpy.fft.fftfreq in  C++
 Eigen::VectorXd fftfreq(int n, double d = 1.0);
 
 // Function to generate the meshgrid in Fourier space
-void GenerateFrequencyMeshgrid(Eigen::MatrixXd& q_x, Eigen::MatrixXd& q_y, double L, int n, int m);
+void GenerateFrequencyMeshgrid(Eigen::VectorXd& q_x, Eigen::VectorXd& q_y,Eigen::MatrixXd& Q_x, Eigen::MatrixXd& Q_y, double L, int n, int m);
+
+// Function to define the q value
+Eigen::MatrixXd computeQValues(const Eigen::VectorXd& Q_x, const Eigen::VectorXd& Q_y);
 
 // Function to define the piecewise function phi(q)
-Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double L, double H);
+Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double q_l, double q_r, double q_s, double H);
 
 // Function to generate random phase and white noise
 void GenerateRandomSurface(Eigen::MatrixXd& surface, const Eigen::VectorXd& q_x, const Eigen::VectorXd& q_y, int n, int m);
@@ -28,17 +31,25 @@ void GenerateRandomSurface(Eigen::MatrixXd& surface, const Eigen::VectorXd& q_x,
 void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filename);
 
 
-void GenerateMeshgrid(Eigen::MatrixXd& x, Eigen::MatrixXd& y, double L, int n, int m) {
-    x = Eigen::MatrixXd(n, m);
-    y = Eigen::MatrixXd(n, m);
-    double dx = L / (n - 1);
-    double dy = L / (m - 1);
+template<typename T>
+double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol);
 
+
+
+////////////////////////////////////////
+//implementation of the functions
+////////////////////////////////////////
+
+void GenerateMeshgrid(Eigen::VectorXd& x, Eigen::VectorXd& y,Eigen::MatrixXd& X, Eigen::MatrixXd& Y, double L, int n, int m) {
+    x = Eigen::VectorXd::LinSpaced(n, 0, L);
+    y = Eigen::VectorXd::LinSpaced(m, 0, L);
+    X = Eigen::MatrixXd::Zero(n, m);
+    Y = Eigen::MatrixXd::Zero(n, m);
     #pragma omp parallel for collapse(2)
     for(int i = 0; i < n; ++i) {
         for(int j = 0; j < m; ++j) {
-            x(i, j) = i * dx;
-            y(i, j) = j * dy;
+            X(i, j) = x(i);
+            Y(i, j) = y(j);
         }
     }
 }
@@ -70,38 +81,49 @@ Eigen::VectorXd fftfreq(int n, double d=1.0){
     return result;
 }
 
-void GenerateFrequencyMeshgrid(Eigen::MatrixXd& Q_x, Eigen::MatrixXd& Q_y, double L, int n, int m) {
-   
+void GenerateFrequencyMeshgrid(Eigen::VectorXd& q_x, Eigen::VectorXd& q_y,Eigen::MatrixXd& Q_x, Eigen::MatrixXd& Q_y, double L, int n, int m){
+    q_x = fftfreq(n, L / n);
+    q_y = fftfreq(m, L / m);
+    Q_x = Eigen::MatrixXd::Zero(n, m);
+    Q_y = Eigen::MatrixXd::Zero(n, m);
+    #pragma omp parallel for collapse(2)
+    for(int i = 0; i < n; ++i) {
+        for(int j = 0; j < m; ++j) {
+            Q_x(i, j) = q_x(i);
+            Q_y(i, j) = q_y(j);
+        }
+    }
 }
 
+// Implementation of function to define the q value
+Eigen::MatrixXd computeQValues(const Eigen::VectorXd& Q_x, const Eigen::VectorXd& Q_y){
+    Eigen::MatrixXd result(Q_x.rows(), Q_x.cols());
+    #pragma omp parallel for collapse(2)
+    for(int i = 0; i < Q_x.rows(); ++i) {
+        for(int j = 0; j < Q_x.cols(); ++j) {
+            result(i, j) = std::sqrt(Q_x(i, j) * Q_x(i, j) + Q_y(i, j) * Q_y(i, j));
+        }
+    }
+    return result;
+}
+
+
 // Implementation of function to define the piecewise function phi(q)
-Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double L, double H) {
+Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double q_l, double q_r, double q_s, double H) {
     double C = phi_0; // represents phi_0
-    double q_l = 2.0 * M_PI / L;
-    double q_r = 2.0 * M_PI / L;
-    double q_s = 2.0 * M_PI * 25.0 / L;
-    double H = 0.8;
-
-    Eigen::MatrixXd result(q.rows(), q.cols());
-
+    Eigen::MatrixXd result = Eigen::MatrixXd::Zero(q.rows(), q.cols());
+    
     #pragma omp parallel for collapse(2)
     for(int i = 0; i < q.rows(); ++i) {
         for (int j = 0; j < q.cols(); ++j){
-            double q_x = q(i,j)[0];
-            double q_y = q(i,j)[1];
-
+            double val = q(i, j);
+            if (q_l <= val && val < q_r){
+                result(i, j) = C;
+            } else if (q_r <= val && val < q_s){
+                result(i, j) = C * std::pow((val / q_r), -2*(H+1));
+            }
         }
     }
-
-
-
-
-
-
-
-
-
-
 }
 
 
@@ -128,3 +150,101 @@ void GenerateRandomSurface(Eigen::MatrixXd& surface, const Eigen::VectorXd& q_x,
 
 
 }
+
+
+
+
+
+
+
+template<typename T>
+double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol) {
+
+    // Expanding the search range if alpha_l and alpha_r do not bound a root
+    while (sign(alphavalue(alpha_l)) == sign(alphavalue(alpha_r))) {
+        alpha_r *= 2;
+        // Optionally, you could throw an exception or handle the error if bounds are incorrect
+    }
+
+    // Midpoint
+    double alpha_c = (alpha_l + alpha_r) / 2.0;
+
+    // Checking if the midpoint satisfies the tolerance condition
+    if (std::abs(alphavalue(alpha_c)) < tol) {
+        return alpha_c;
+    } else if (sign(alphavalue(alpha_l)) == sign(alphavalue(alpha_c))) {
+        return findAlpha0(P, W, alpha_c, alpha_r, tol); // Narrowing the search to the right half
+    } else {
+        return findAlpha0(P, W, alpha_l, alpha_c, tol); // Narrowing the search to the left half
+    }
+
+
+    return 0.0;
+}
+
+
+
+
+// main function
+int main{
+    // Define the loading
+    double W = 1e2;
+
+    // Define the domain size
+    double L = 2;
+    int n = 300;
+    int m = 300;
+    double dx = L / n;
+    double dy = L / m;
+
+    // Generate meshgrid
+    Eigen::VectorXd x, y;
+    Eigen::MatrixXd X, Y;
+    GenerateMeshgrid(x, y, X, Y, L, n, m);
+
+    // Generate frequency meshgrid
+    Eigen::VectorXd q_x, q_y;
+    Eigen::MatrixXd Q_x, Q_y;
+    GenerateFrequencyMeshgrid(q_x, q_y, Q_x, Q_y, L, n, m);
+
+    // Define the q value
+    Eigen::MatrixXd q = computeQValues(Q_x, Q_y);
+
+    // Define the piecewise function phi(q)
+    double phi_0 = 1.0;
+    double q_l = 2*M_PI/L;
+    double q_r = 2*M_PI/L;
+    double q_s = 2*M_PI*25/L;
+    double H = 0.8;
+    Eigen::MatrixXd Phi = phi(q, phi_0, q_l, q_r, q_s, H);
+
+    // Generate random phase and white noise
+
+
+
+
+
+    // Save the surface to a file
+    SaveSurfaceToFile(surface, "surface.dat");
+
+
+
+    // Allocate memory for the pressure field
+    fftw_complex* P = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
+    fftw_complex* G = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
+
+    // Update the pressure field
+
+
+
+
+
+    // Deallocate memory
+    fftw_free(P);
+    fftw_free(G);
+
+    return 0;
+
+}
+
+

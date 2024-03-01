@@ -57,7 +57,7 @@ phi_values = phi(q_values)
 
 # Generate random phase
 gen = np.random.default_rng()
-theta = gen.uniform(0, 2*np.pi, size=phi_values.shape)
+#theta = gen.uniform(0, 2*np.pi, size=phi_values.shape)
 
 # Generate white noise and apply PSD and phase
 white_noise = gen.normal(size=phi_values.shape)
