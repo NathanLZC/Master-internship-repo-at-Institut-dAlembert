@@ -158,9 +158,12 @@ Eigen::MatrixXd generateRandomSurface(const Eigen::MatrixXd& phiValues, int n, i
     // Generate white noise using the predefined function
     Eigen::MatrixXd whiteNoise = generateWhiteNoise(n, m);
 
+    // Allocate memory for the surface(return value)
+    Eigen::MatrixXd surface = Eigen::MatrixXd::Zero(n, m);
+
     // Allocate memory for FFTW inputs/outputs
-    fftw_complex* fftInput = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
-    fftw_complex* fftOutput = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
+    //fftw_complex* fftInput = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
+    fftw_complex* fftOutput = (fftw_complex*)fftw_malloc(n * (m/2 + 1) * sizeof(fftw_complex));
 
     // FFTW plan
     //FFT and IFFT Operations: These are performed using FFTW's r2c (real-to-complex) and c2r (complex-to-real) transformations, 
@@ -173,19 +176,17 @@ Eigen::MatrixXd generateRandomSurface(const Eigen::MatrixXd& phiValues, int n, i
     // Apply the filter
     #pragma omp parallel for collapse(2)
     for (int i=0; i < n; ++i) {
-        for (int j=0; j < m; ++j) { ////??????
-            int index = i * m + j;
+        for (int j=0; j < m/2 + 1; ++j) { ////??????
+            int index = i * (m/2 + 1)+ j;
             double filter = std::sqrt(phiValues(i, j));
-            fftOutput[index][0] *= phiValues(i, j); // Real part
-            fftOutput[index][1] *= phiValues(i, j); // Imaginary part
+            fftOutput[index][0] *= filter; // Real part
+            fftOutput[index][1] *= filter; // Imaginary part
         }
     }
 
     // FFTW plan for inverse transform
-    fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, fftOutput, whiteNoise.data(), FFTW_ESTIMATE);
+    fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, fftOutput, surface.data(), FFTW_ESTIMATE);
 
-    //??????
-    Eigen::MatrixXd surface = whiteNoise;
 
     // Execute the backward plan
     fftw_execute(p_backward);
