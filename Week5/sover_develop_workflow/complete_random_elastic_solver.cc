@@ -25,6 +25,15 @@ Eigen::MatrixXd computeQValues(const Eigen::VectorXd& Q_x, const Eigen::VectorXd
 // Function to define the piecewise function phi(q)
 Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double q_l, double q_r, double q_s, double H);
 
+//Function to Generate white noise
+Eigen::MatrixXd generateWhiteNoise(int rows, int cols);
+
+// Function to generate random phase and white noise
+Eigen::MatrixXd generateRandomSurface(const Eigen::MatrixXd& phiValues, int n, int m);
+
+// Function to save data to a file
+void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filename);
+
 // Function to compute the mean of a vector
 template<typename T>
 double mean(std::vector<T>& v, double n);
@@ -32,16 +41,6 @@ double mean(std::vector<T>& v, double n);
 // Function to compute the sign of a vector
 template<typename T>
 std::vector<int> sign(const std::vector<T>& v);
-
-//Function to Generate white noise
-Eigen::MatrixXd generateWhiteNoise(int rows, int cols);
-
-// Function to generate random phase and white noise
-void GenerateRandomSurface(Eigen::MatrixXd& surface, const Eigen::VectorXd& q_x, const Eigen::VectorXd& q_y, int n, int m);
-
-// Function to save data to a file
-void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filename);
-
 
 template<typename T>
 double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol);
@@ -120,7 +119,6 @@ Eigen::MatrixXd computeQValues(const Eigen::VectorXd& Q_x, const Eigen::VectorXd
     return result;
 }
 
-
 // Implementation of function to define the piecewise function phi(q)
 Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double q_l, double q_r, double q_s, double H) {
     double C = phi_0; // represents phi_0
@@ -136,6 +134,78 @@ Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double q_l, double q
                 result(i, j) = C * std::pow((val / q_r), -2*(H+1));
             }
         }
+    }
+}
+
+// Implementation to generate white noise//https://cplusplus.com/reference/random/mt19937/
+Eigen::MatrixXd generateWhiteNoise(int rows, int cols) {
+    std::random_device rd{}; //std::random_device is a mechanism provided by C++ to generate a non-deterministic random number. 
+                             //It's often used as a seed for more complex random number generators. The {} initializes an instance of std::random_device.
+    std::mt19937 gen{rd()};  //std::mt19937 is a pseudo-random number generator (PRNG) based on the Mersenne Twister algorithm. 
+                             //It's known for producing high-quality random numbers and has a very long period (the sequence of random numbers it generates before repeating is extremely long).
+    std::normal_distribution<> d{0,1}; // mean 0, standard deviation 1
+
+    Eigen::MatrixXd whiteNoise(rows, cols);
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            whiteNoise(i, j) = d(gen);
+        }
+    }
+    return whiteNoise;
+}
+
+Eigen::MatrixXd generateRandomSurface(const Eigen::MatrixXd& phiValues, int n, int m){
+    // Generate white noise using the predefined function
+    Eigen::MatrixXd whiteNoise = generateWhiteNoise(n, m);
+
+    // Allocate memory for FFTW inputs/outputs
+    fftw_complex* fftInput = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
+    fftw_complex* fftOutput = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
+
+    // FFTW plan
+    //FFT and IFFT Operations: These are performed using FFTW's r2c (real-to-complex) and c2r (complex-to-real) transformations, 
+    //suitable for handling the real-valued nature of the white noise and the resulting surface.
+    fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, whiteNoise.data(), fftOutput, FFTW_ESTIMATE);
+
+    // Excute the foward plan
+    fftw_execute(p_forward);
+
+    // Apply the filter
+    #pragma omp parallel for collapse(2)
+    for (int i=0; i < n; ++i) {
+        for (int j=0; j < m; ++j) { ////??????
+            int index = i * m + j;
+            double filter = std::sqrt(phiValues(i, j));
+            fftOutput[index][0] *= phiValues(i, j); // Real part
+            fftOutput[index][1] *= phiValues(i, j); // Imaginary part
+        }
+    }
+
+    // FFTW plan for inverse transform
+    fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, fftOutput, whiteNoise.data(), FFTW_ESTIMATE);
+
+    //??????
+    Eigen::MatrixXd surface = whiteNoise;
+
+    // Execute the backward plan
+    fftw_execute(p_backward);
+
+    // Deallocate memory
+    fftw_destroy_plan(p_forward);
+    fftw_destroy_plan(p_backward);
+    fftw_free(fftInput);
+    fftw_free(fftOutput);
+
+    return surface;
+}
+
+void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filename){
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        file << surface << '\n';
+        file.close();
+    } else {
+        std::cerr << "Unable to open file" << std::endl;
     }
 }
 
@@ -156,44 +226,6 @@ std::vector<int> sign(const std::vector<T>& v) {
     }
     return signs;
 }
-
-// Implementation to generate white noise//https://cplusplus.com/reference/random/mt19937/
-Eigen::MatrixXd generateWhiteNoise(int rows, int cols) {
-    std::random_device rd{}; //std::random_device is a mechanism provided by C++ to generate a non-deterministic random number. 
-                             //It's often used as a seed for more complex random number generators. The {} initializes an instance of std::random_device.
-    std::mt19937 gen{rd()};  //std::mt19937 is a pseudo-random number generator (PRNG) based on the Mersenne Twister algorithm. 
-                             //It's known for producing high-quality random numbers and has a very long period (the sequence of random numbers it generates before repeating is extremely long).
-    std::normal_distribution<> d{0,1}; // mean 0, standard deviation 1
-
-    Eigen::MatrixXd whiteNoise(rows, cols);
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            whiteNoise(i, j) = d(gen);
-        }
-    }
-    return whiteNoise;
-}
-
-void GenerateRandomSurface(Eigen::MatrixXd& surface, const Eigen::VectorXd& q_x, const Eigen::VectorXd& q_y, int n, int m){
-
-
-
-
-}
-
-void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filename){
-    std::ofstream file(filename);
-    if (file.is_open()) {
-        file << surface << '\n';
-        file.close();
-    } else {
-        std::cerr << "Unable to open file" << std::endl;
-    }
-}
-
-
-
-
 
 template<typename T>
 double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol) {
