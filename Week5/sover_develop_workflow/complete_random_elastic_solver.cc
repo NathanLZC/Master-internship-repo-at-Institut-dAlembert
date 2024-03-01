@@ -159,8 +159,10 @@ std::vector<int> sign(const std::vector<T>& v) {
 
 // Implementation to generate white noise//https://cplusplus.com/reference/random/mt19937/
 Eigen::MatrixXd generateWhiteNoise(int rows, int cols) {
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
+    std::random_device rd{}; //std::random_device is a mechanism provided by C++ to generate a non-deterministic random number. 
+                             //It's often used as a seed for more complex random number generators. The {} initializes an instance of std::random_device.
+    std::mt19937 gen{rd()};  //std::mt19937 is a pseudo-random number generator (PRNG) based on the Mersenne Twister algorithm. 
+                             //It's known for producing high-quality random numbers and has a very long period (the sequence of random numbers it generates before repeating is extremely long).
     std::normal_distribution<> d{0,1}; // mean 0, standard deviation 1
 
     Eigen::MatrixXd whiteNoise(rows, cols);
