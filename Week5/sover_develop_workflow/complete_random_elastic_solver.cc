@@ -6,6 +6,7 @@
 #include </gagarine/temporaires/zli/fftw/include/fftw3.h>
 #include <omp.h>
 #include </gagarine/temporaires/zli/eigen-3.4.0/Eigen/Dense>
+#include <random> // for std::random_device, std::mt19937, std::normal_distribution
 #include <fstream> // for std::ofstream
 
 
@@ -24,6 +25,17 @@ Eigen::MatrixXd computeQValues(const Eigen::VectorXd& Q_x, const Eigen::VectorXd
 // Function to define the piecewise function phi(q)
 Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double q_l, double q_r, double q_s, double H);
 
+// Function to compute the mean of a vector
+template<typename T>
+double mean(std::vector<T>& v, double n);
+
+// Function to compute the sign of a vector
+template<typename T>
+std::vector<int> sign(const std::vector<T>& v);
+
+//Function to Generate white noise
+Eigen::MatrixXd generateWhiteNoise(int rows, int cols);
+
 // Function to generate random phase and white noise
 void GenerateRandomSurface(Eigen::MatrixXd& surface, const Eigen::VectorXd& q_x, const Eigen::VectorXd& q_y, int n, int m);
 
@@ -33,6 +45,7 @@ void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filena
 
 template<typename T>
 double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol);
+
 
 
 
@@ -144,6 +157,21 @@ std::vector<int> sign(const std::vector<T>& v) {
     return signs;
 }
 
+// Implementation to generate white noise//https://cplusplus.com/reference/random/mt19937/
+Eigen::MatrixXd generateWhiteNoise(int rows, int cols) {
+    std::random_device rd{};
+    std::mt19937 gen{rd()};
+    std::normal_distribution<> d{0,1}; // mean 0, standard deviation 1
+
+    Eigen::MatrixXd whiteNoise(rows, cols);
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            whiteNoise(i, j) = d(gen);
+        }
+    }
+    return whiteNoise;
+}
+
 void GenerateRandomSurface(Eigen::MatrixXd& surface, const Eigen::VectorXd& q_x, const Eigen::VectorXd& q_y, int n, int m){
 
 
@@ -151,7 +179,15 @@ void GenerateRandomSurface(Eigen::MatrixXd& surface, const Eigen::VectorXd& q_x,
 
 }
 
-
+void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filename){
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        file << surface << '\n';
+        file.close();
+    } else {
+        std::cerr << "Unable to open file" << std::endl;
+    }
+}
 
 
 
@@ -186,7 +222,7 @@ double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, d
 
 
 // main function
-int main{
+int main(){
     // Define the loading
     double W = 1e2;
 
