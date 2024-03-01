@@ -12,6 +12,9 @@
 // Function to generate meshgrid equivalent in C++
 void GenerateMeshgrid(Eigen::MatrixXd& x, Eigen::MatrixXd& y, double L, int n, int m);
 
+// Function to realize numpy.fft.fftfreq in  C++
+Eigen::VectorXd fftfreq(int n, double d = 1.0);
+
 // Function to generate the meshgrid in Fourier space
 void GenerateFrequencyMeshgrid(Eigen::MatrixXd& q_x, Eigen::MatrixXd& q_y, double L, int n, int m);
 
@@ -40,6 +43,33 @@ void GenerateMeshgrid(Eigen::MatrixXd& x, Eigen::MatrixXd& y, double L, int n, i
     }
 }
 
+// Implementation of function to implement numpy.fft.fftfreq in  C++
+Eigen::VectorXd fftfreq(int n, double d=1.0){
+    Eigen::VectorXd result(n);
+    if (n % 2 == 0) {
+        int N = n / 2;
+        #pragma omp parallel for
+        for(int i = 0; i < N; ++i) {
+            result(i) = i / (N * d);
+        }
+        #pragma omp parallel for
+        for(int i = N; i < n; ++i) {
+            result(i) = (i - n) / (N * d);
+        }
+    } else {
+        int N = (n - 1) / 2;
+        #pragma omp parallel for
+        for(int i = 0; i < N; ++i) {
+            result(i) = i / (N * d);
+        }
+        #pragma omp parallel for
+        for(int i = N; i < n; ++i) {
+            result(i) = (i - n) / (N * d);
+        }
+    }
+    return result;
+}
+
 void GenerateFrequencyMeshgrid(Eigen::MatrixXd& Q_x, Eigen::MatrixXd& Q_y, double L, int n, int m) {
    
 }
@@ -57,6 +87,8 @@ Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double L, double H) 
     #pragma omp parallel for collapse(2)
     for(int i = 0; i < q.rows(); ++i) {
         for (int j = 0; j < q.cols(); ++j){
+            double q_x = q(i,j)[0];
+            double q_y = q(i,j)[1];
 
         }
     }
