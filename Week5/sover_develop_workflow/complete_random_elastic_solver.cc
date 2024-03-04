@@ -42,9 +42,16 @@ double mean(std::vector<T>& v, double n);
 template<typename T>
 std::vector<int> sign(const std::vector<T>& v);
 
+// Function to find the alpha value for steepest descent algorithm energy minimization
 template<typename T>
 double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol);
 
+// Generate kernel function
+Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& phiValues, const Eigen::VectorXd& q_x, const Eigen::VectorXd& q_y, double dx, double dy);
+
+
+// Function to minimize the energy
+void minimizeEnergy(const Eigen::MatrixXd& G, Eigen::MatrixXd& P, double W, double tol, int maxIter);
 
 
 
@@ -194,7 +201,7 @@ Eigen::MatrixXd generateRandomSurface(const Eigen::MatrixXd& phiValues, int n, i
     // Deallocate memory
     fftw_destroy_plan(p_forward);
     fftw_destroy_plan(p_backward);
-    fftw_free(fftInput);
+    //fftw_free(fftInput);
     fftw_free(fftOutput);
 
     return surface;
@@ -263,6 +270,7 @@ int main(){
 
     // Define the domain size
     double L = 2;
+    double S = L * L;
     int n = 300;
     int m = 300;
     double dx = L / n;
@@ -304,7 +312,17 @@ int main(){
     fftw_complex* P = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
     fftw_complex* G = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
 
+
+    // Initial guess for the pressure
+    Eigen::MatrixXd P = Eigen::MatrixXd::Constant(n, m, W / S);
+
+    //
+
     // Update the pressure field
+    double tol = 1e-6;
+    int maxIter = 1000;
+    int k = 0;
+    double error = std::numeric_limits<double>::infinity();
 
 
 
