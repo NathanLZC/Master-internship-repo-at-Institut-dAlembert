@@ -284,6 +284,8 @@ void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::M
     fftw_complex* P_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
     fftw_complex* G_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
 
+    G_fourier = P_fourier * kernel_fourier;
+
 
     // FFTW plan
     fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, P.data(), P_fourier, FFTW_ESTIMATE);
