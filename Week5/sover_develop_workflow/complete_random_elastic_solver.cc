@@ -47,11 +47,11 @@ template<typename T>
 double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol);
 
 // Generate kernel function
-Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& phiValues, const Eigen::VectorXd& q_x, const Eigen::VectorXd& q_y, double dx, double dy);
+Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd& QY, double E_star);
 
 
 // Function to minimize the energy
-void minimizeEnergy(const Eigen::MatrixXd& G, Eigen::MatrixXd& P, double W, double tol, int maxIter);
+void minimizeEnergy(const Eigen::MatrixXd& G, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double w, double error, double tol, int k, int maxIter);
 
 
 
@@ -260,6 +260,80 @@ double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, d
     return 0.0;
 }
 
+//inplementation of the kernel function
+Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd& QY, double E_star){
+    Eigen::MatrixXd kernel_fourier = Eigen::MatrixXd::Zero(QX.rows(), QX.cols());
+    #pragma omp parallel for collapse(2)
+    for(int i = 0; i < QX.rows(); ++i) {
+        for(int j = 0; j < QX.cols(); ++j) {
+            if (!(i == 0 && j == 0)) {
+                double qMagnitude = std::sqrt(QX(i, j) * QX(i, j) + QY(i, j) * QY(i, j));
+                kernel_fourier(i, j) = 2 / (E_star * qMagnitude);
+            }
+        }
+    }
+    return kernel_fourier;
+}
+
+// Function to minimize the energy
+void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double w, double s, double error, double tol, int k, int maxIter){
+    // Allocate memory for the pressure field
+    fftw_complex* P_fourier = (fftw_complex*)fftw_malloc(sizeof(P) * sizeof(fftw_complex));
+    fftw_complex* G_fourier = (fftw_complex*)fftw_malloc(sizeof(P)* sizeof(fftw_complex));
+
+    int n = P.rows();
+    int m = P.cols();
+    // FFTW plan
+    fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, P, P_fourier, FFTW_ESTIMATE);
+    fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, G, P, FFTW_ESTIMATE);
+
+    // Execute the forward plan
+    fftw_execute(p_forward);
+
+/*
+    int k = 0;
+    while (std::abs(error) > tol && k < maxIter) {
+        // Perform FFT on P
+        // Note: Actual FFT operation on P needed here
+        
+        // Apply kernel in Fourier domain and perform inverse FFT to get G
+        // Note: Actual application of kernel_fourier and inverse FFT needed
+        
+        // Subtract h_profile from G
+        G = G - h_profile;
+        
+        // Update P by subtracting G
+        P = P - G;
+        
+        // Ensure P is non-negative
+        P = P.cwiseMax(0.0);
+        
+        // Adjust P to satisfy the total load constraint
+        double alpha_0 = find_alpha_0(P, W / S, P.minCoeff(), W, tol);
+        P += alpha_0;
+        P = P.cwiseMax(0.0);
+        
+        // Calculate the error for convergence checking
+        // This is a simplified version; adjust as needed
+        error = (P.array() * (G.array() - G.minCoeff())).sum() / (P.size() * W);
+        
+        std::cout << "Error: " << error << ", Iteration: " << k << std::endl;
+        
+        k++;  // Increment the iteration counter
+    }
+*/    
+
+    // Deallocate memory
+    fftw_destroy_plan(p_forward);
+    fftw_destroy_plan(p_backward);
+    fftw_free(P_fourier);
+    fftw_free(G_fourier);
+}
+
+
+
+
+
 
 
 
@@ -275,6 +349,11 @@ int main(){
     int m = 300;
     double dx = L / n;
     double dy = L / m;
+
+    // Material parameters
+    double E = 1e3; // Young's modulus
+    double nu = 0.3;  // Poisson's ratio
+    double E_star = E / (1 - nu * nu);  // Plane strain modulus
 
     // Generate meshgrid
     Eigen::VectorXd x, y;
@@ -298,13 +377,21 @@ int main(){
     Eigen::MatrixXd Phi = phi(q, phi_0, q_l, q_r, q_s, H);
 
     // Generate random phase and white noise
-
-
-
+    Eigen::MatrixXd surface = generateRandomSurface(Phi, n, m);
 
 
     // Save the surface to a file
     SaveSurfaceToFile(surface, "surface.dat");
+
+
+    // Initial guess for the pressure
+    Eigen::MatrixXd P_initial = Eigen::MatrixXd::Constant(n, m, W / S);
+
+    // Update the pressure field
+    double tol = 1e-6;
+    int maxIter = 1000;
+    int k = 0;
+    double error = std::numeric_limits<double>::infinity();
 
 
 
@@ -312,17 +399,6 @@ int main(){
     fftw_complex* P = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
     fftw_complex* G = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
 
-
-    // Initial guess for the pressure
-    Eigen::MatrixXd P = Eigen::MatrixXd::Constant(n, m, W / S);
-
-    //
-
-    // Update the pressure field
-    double tol = 1e-6;
-    int maxIter = 1000;
-    int k = 0;
-    double error = std::numeric_limits<double>::infinity();
 
 
 
