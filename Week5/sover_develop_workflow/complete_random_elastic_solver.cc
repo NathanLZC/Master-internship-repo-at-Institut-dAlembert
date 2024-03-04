@@ -277,15 +277,17 @@ Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd&
 
 // Function to minimize the energy
 void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double w, double s, double error, double tol, int k, int maxIter){
-    // Allocate memory for the pressure field
-    fftw_complex* P_fourier = (fftw_complex*)fftw_malloc(sizeof(P) * sizeof(fftw_complex));
-    fftw_complex* G_fourier = (fftw_complex*)fftw_malloc(sizeof(P)* sizeof(fftw_complex));
-
     int n = P.rows();
     int m = P.cols();
+    
+    // Allocate memory for the pressure field
+    fftw_complex* P_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
+    fftw_complex* G_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
+
+
     // FFTW plan
-    fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, P, P_fourier, FFTW_ESTIMATE);
-    fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, G, P, FFTW_ESTIMATE);
+    fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, P.data(), P_fourier, FFTW_ESTIMATE);
+    fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, G, P_fourier, FFTW_ESTIMATE);
 
     // Execute the forward plan
     fftw_execute(p_forward);
