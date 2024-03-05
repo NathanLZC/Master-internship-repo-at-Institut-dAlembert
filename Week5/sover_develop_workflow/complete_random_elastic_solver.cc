@@ -255,8 +255,7 @@ double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, d
     } else {
         return findAlpha0(P, W, alpha_l, alpha_c, tol); // Narrowing the search to the left half
     }
-
-
+    
     return 0.0;
 }
 
@@ -276,7 +275,7 @@ Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd&
 }
 
 // Function to minimize the energy
-void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double w, double s, double error, double tol, int k, int maxIter){
+void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double W, double S, double error, double tol, int k, int maxIter){
     int n = P.rows();
     int m = P.cols();
     
@@ -284,27 +283,28 @@ void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::M
     fftw_complex* P_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
     fftw_complex* G_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
 
-    G_fourier = P_fourier * kernel_fourier;
+    // G
+    Eigen::MatrixXd G = Eigen::MatrixXd::Zero(n, m);
 
 
-    // FFTW plan
-    fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, P.data(), P_fourier, FFTW_ESTIMATE);
-    fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, G, P_fourier, FFTW_ESTIMATE);
-
-    // Execute the forward plan
-    fftw_execute(p_forward);
-
-/*
     int k = 0;
     while (std::abs(error) > tol && k < maxIter) {
         // Perform FFT on P
-        // Note: Actual FFT operation on P needed here
+        // FFTW plan
+        fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, P.data(), P_fourier, FFTW_ESTIMATE);
+
+        // Execute the forward plan
+        fftw_execute(p_forward);
+
+        G_fourier = P_fourier * kernel_fourier;
+
+        fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, G_fourier, G, FFTW_ESTIMATE);
         
         // Apply kernel in Fourier domain and perform inverse FFT to get G
         // Note: Actual application of kernel_fourier and inverse FFT needed
         
         // Subtract h_profile from G
-        G = G - h_profile;
+        G = G - surface;
         
         // Update P by subtracting G
         P = P - G;
@@ -313,7 +313,7 @@ void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::M
         P = P.cwiseMax(0.0);
         
         // Adjust P to satisfy the total load constraint
-        double alpha_0 = find_alpha_0(P, W / S, P.minCoeff(), W, tol);
+        double alpha_0 = findAlpha0(P, W / S, P.minCoeff(), W, tol);
         P += alpha_0;
         P = P.cwiseMax(0.0);
         
@@ -324,21 +324,21 @@ void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::M
         std::cout << "Error: " << error << ", Iteration: " << k << std::endl;
         
         k++;  // Increment the iteration counter
-    }
-*/    
 
-    // Deallocate memory
-    fftw_destroy_plan(p_forward);
-    fftw_destroy_plan(p_backward);
+        // Deallocate memory
+        fftw_destroy_plan(p_forward);
+        fftw_destroy_plan(p_backward);
+    }
+   
+
+
     fftw_free(P_fourier);
     fftw_free(G_fourier);
 }
 
 
 
-
-
-
+////////////////////////////////////////
 
 
 // main function
@@ -391,6 +391,9 @@ int main(){
     // Initial guess for the pressure
     Eigen::MatrixXd P_initial = Eigen::MatrixXd::Constant(n, m, W / S);
 
+    // Generate kernel function
+    Eigen::MatrixXd kernel_fourier = generateKernel(Q_x, Q_y, E_star);
+
     // Update the pressure field
     double tol = 1e-6;
     int maxIter = 1000;
@@ -398,19 +401,17 @@ int main(){
     double error = std::numeric_limits<double>::infinity();
 
 
-
-    // Allocate memory for the pressure field
-    fftw_complex* P = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
-    fftw_complex* G = (fftw_complex*)fftw_malloc(n * m * sizeof(fftw_complex));
+    // energy minimization
+    minimizeEnergy(surface, P_initial, kernel_fourier, W, S, error, tol, k, maxIter);
 
 
 
 
 
 
-    // Deallocate memory
-    fftw_free(P);
-    fftw_free(G);
+
+
+
 
     return 0;
 
