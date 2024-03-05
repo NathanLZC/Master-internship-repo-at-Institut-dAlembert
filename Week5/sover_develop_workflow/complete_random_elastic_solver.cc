@@ -35,15 +35,20 @@ Eigen::MatrixXd generateRandomSurface(const Eigen::MatrixXd& phiValues, int n, i
 void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filename);
 
 // Function to compute the mean of a vector
+/*
 template<typename T>
-double mean(std::vector<T>& v, double n);
+//double mean(std::vector<T>& v, double n);
+*/
 
 // Function to compute the sign of a vector
 template<typename T>
 std::vector<int> sign(const std::vector<T>& v);
 
+// Function to define the alpha value
+std::vector<int> alphavalue(double alpha, Eigen::MatrixXd& P, double W, double S);
+
 // Function to find the alpha value for steepest descent algorithm energy minimization
-double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol);
+double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol, double S);
 
 // Generate kernel function
 Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd& QY, double E_star);
@@ -215,12 +220,13 @@ void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filena
 }
 
 
-//need to accelerate this function
+/*
 template<typename T>
 double mean(std::vector<T>& v, double n) {
     T sum = std::accumulate(v.begin(), v.end(), T(0)) + n * v.size();
     return sum / static_cast<double>(v.size());
 }
+*/
 
 //sign function
 template<typename T>
@@ -232,10 +238,34 @@ std::vector<int> sign(const std::vector<T>& v) {
     return signs;
 }
 
-double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol) {
+
+
+
+
+// Function to define the alpha value
+std::vector<double> alphavalue(double alpha, Eigen::MatrixXd& P, double W, double S) {
+    std::vector<double> result(P.rows() * P.cols());
+    #pragma omp parallel for collapse(2)
+    for(int i = 0; i < P.rows(); ++i) {
+        for(int j = 0; j < P.cols(); ++j) {
+            result[i * P.cols() + j] = (P(i, j) + alpha);
+        }
+    }
+    result += W;
+    result /= S;
+    return ;
+}
+
+
+
+
+
+
+
+double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol, double S) {
 
     // Expanding the search range if alpha_l and alpha_r do not bound a root
-    while (sign(alphavalue(alpha_l)) == sign(alphavalue(alpha_r))) {
+    while (sign(alphavalue(alpha_l, P, W, S)) == sign(alphavalue(alpha_r, P, W, S))) {
         alpha_r *= 2;
         // Optionally, you could throw an exception or handle the error if bounds are incorrect
     }
@@ -244,12 +274,12 @@ double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, 
     double alpha_c = (alpha_l + alpha_r) / 2.0;
 
     // Checking if the midpoint satisfies the tolerance condition
-    if (std::abs(alphavalue(alpha_c)) < tol) {
+    if (std::abs(alphavalue(alpha_c, P, W, S)) < tol) {
         return alpha_c;
-    } else if (sign(alphavalue(alpha_l)) == sign(alphavalue(alpha_c))) {
-        return findAlpha0(P, W, alpha_c, alpha_r, tol); // Narrowing the search to the right half
+    } else if (sign(alphavalue(alpha_l, P, W, S)) == sign(alphavalue(alpha_c, P, W, S))) {
+        return findAlpha0(P, W, alpha_c, alpha_r, tol, S); // Narrowing the search to the right half
     } else {
-        return findAlpha0(P, W, alpha_l, alpha_c, tol); // Narrowing the search to the left half
+        return findAlpha0(P, W, alpha_l, alpha_c, tol, S); // Narrowing the search to the left half
     }
     
     return 0.0;
@@ -317,7 +347,7 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
         P = P.cwiseMax(0.0);
         
         // Adjust P to satisfy the total load constraint
-        double alpha_0 = findAlpha0(P, W / S, P.minCoeff(), W, tol);
+        double alpha_0 = findAlpha0(P, W / S, P.minCoeff(), W, tol, S);
         P.array() += alpha_0;
         P = P.cwiseMax(0.0);
         
