@@ -43,8 +43,7 @@ template<typename T>
 std::vector<int> sign(const std::vector<T>& v);
 
 // Function to find the alpha value for steepest descent algorithm energy minimization
-template<typename T>
-double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol);
+double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol);
 
 // Generate kernel function
 Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd& QY, double E_star);
@@ -72,7 +71,7 @@ void GenerateMeshgrid(Eigen::VectorXd& x, Eigen::VectorXd& y,Eigen::MatrixXd& X,
 }
 
 // Implementation of function to implement numpy.fft.fftfreq in  C++
-Eigen::VectorXd fftfreq(int n, double d=1.0){
+Eigen::VectorXd fftfreq(int n, double d){
     Eigen::VectorXd result(n);
     if (n % 2 == 0) {
         int N = n / 2;
@@ -233,8 +232,7 @@ std::vector<int> sign(const std::vector<T>& v) {
     return signs;
 }
 
-template<typename T>
-double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, double tol) {
+double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol) {
 
     // Expanding the search range if alpha_l and alpha_r do not bound a root
     while (sign(alphavalue(alpha_l)) == sign(alphavalue(alpha_r))) {
@@ -288,18 +286,23 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
     // Displacement
     Eigen::MatrixXd displacement = Eigen::MatrixXd::Zero(n, m);
 
+    Eigen::Map<Eigen::MatrixXcd> G_(reinterpret_cast<std::complex<double>*>(G_fourier), n, m/2+1);
+    Eigen::Map<Eigen::MatrixXcd> P_(reinterpret_cast<std::complex<double>*>(P_fourier), n, m/2+1);
+
+    // Perform FFT on P
+    // FFTW plan
+    fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, P.data(), P_fourier, FFTW_ESTIMATE);
+    fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, G_fourier, G.data(), FFTW_ESTIMATE);
 
     while (std::abs(error) > tol && k < maxIter) {
-        // Perform FFT on P
-        // FFTW plan
-        fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, P.data(), P_fourier, FFTW_ESTIMATE);
+
 
         // Execute the forward plan
         fftw_execute(p_forward);
 
-        G_fourier = P_fourier * kernel_fourier;
+        //matrix multiplication with blas library
+        G_ = P_.array() * kernel_fourier.array();
 
-        fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, G_fourier, G, FFTW_ESTIMATE);
         
         // Apply kernel in Fourier domain and perform inverse FFT to get G
         // Note: Actual application of kernel_fourier and inverse FFT needed
@@ -315,44 +318,34 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
         
         // Adjust P to satisfy the total load constraint
         double alpha_0 = findAlpha0(P, W / S, P.minCoeff(), W, tol);
-        P += alpha_0;
+        P.array() += alpha_0;
         P = P.cwiseMax(0.0);
         
         // Calculate the error for convergence checking
         // This is a simplified version; adjust as needed
-        error = (P.array() * (G.array() - G.minencapsulate Coeff())).sum() / (P.size() * W);
+        error = (P.array() * (G.array() - G.minCoeff())).sum() / (P.size() * W);
         
         std::cout << "Error: " << error << ", Iteration: " << k << std::endl;
         
         k++;  // Increment the iteration counter
 
-        // Deallocate memory
-        fftw_destroy_plan(p_forward);
-        fftw_destroy_plan(p_backward);
+
 
 
     }
 
 
-    //FFTW plan for displacement
-    fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, displacement.data(), displacement_fourier, FFTW_ESTIMATE);
-
-    // Execute the forward plan
-    fftw_execute(p_forward);
-
-    displacement_fourier = P_fourier * kernel_fourier;
-
-    //FFTW plan for inverse transform
-    fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, displacement_fourier, displacement.data(), FFTW_ESTIMATE);
-
-    // Execute the backward plan
-    fftw_execute(p_backward);
+    // Deallocate memory
+    fftw_destroy_plan(p_forward);
+    fftw_destroy_plan(p_backward);
 
 
     fftw_free(P_fourier);
     fftw_free(G_fourier);
 
-    return displacement;
+    G = G.array() - G.minCoeff();
+
+    return G + surface;
 }
 
 
