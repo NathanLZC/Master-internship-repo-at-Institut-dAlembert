@@ -49,10 +49,8 @@ double findAlpha0(std::vector<T>& P, double W, double alpha_l, double alpha_r, d
 // Generate kernel function
 Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd& QY, double E_star);
 
-
 // Function to minimize the energy
-void minimizeEnergy(const Eigen::MatrixXd& G, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double w, double error, double tol, int k, int maxIter);
-
+Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double W, double S, double error, double tol, int k, int maxIter);
 
 
 ////////////////////////////////////////
@@ -274,20 +272,23 @@ Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd&
     return kernel_fourier;
 }
 
-// Function to minimize the energy
-void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double W, double S, double error, double tol, int k, int maxIter){
+// Function to minimize the energy to compute the displacement field
+Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double W, double S, double error, double tol, int k, int maxIter){
     int n = P.rows();
     int m = P.cols();
     
-    // Allocate memory for the pressure field
+    // Allocate memory for the pressure field, gap function and displacement field
     fftw_complex* P_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
     fftw_complex* G_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
+    fftw_complex* displacement_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
 
     // G
     Eigen::MatrixXd G = Eigen::MatrixXd::Zero(n, m);
 
+    // Displacement
+    Eigen::MatrixXd displacement = Eigen::MatrixXd::Zero(n, m);
 
-    int k = 0;
+
     while (std::abs(error) > tol && k < maxIter) {
         // Perform FFT on P
         // FFTW plan
@@ -319,7 +320,7 @@ void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::M
         
         // Calculate the error for convergence checking
         // This is a simplified version; adjust as needed
-        error = (P.array() * (G.array() - G.minCoeff())).sum() / (P.size() * W);
+        error = (P.array() * (G.array() - G.minencapsulate Coeff())).sum() / (P.size() * W);
         
         std::cout << "Error: " << error << ", Iteration: " << k << std::endl;
         
@@ -328,12 +329,30 @@ void minimizeEnergy(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::M
         // Deallocate memory
         fftw_destroy_plan(p_forward);
         fftw_destroy_plan(p_backward);
+
+
     }
-   
+
+
+    //FFTW plan for displacement
+    fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, displacement.data(), displacement_fourier, FFTW_ESTIMATE);
+
+    // Execute the forward plan
+    fftw_execute(p_forward);
+
+    displacement_fourier = P_fourier * kernel_fourier;
+
+    //FFTW plan for inverse transform
+    fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, displacement_fourier, displacement.data(), FFTW_ESTIMATE);
+
+    // Execute the backward plan
+    fftw_execute(p_backward);
 
 
     fftw_free(P_fourier);
     fftw_free(G_fourier);
+
+    return displacement;
 }
 
 
@@ -383,10 +402,8 @@ int main(){
     // Generate random phase and white noise
     Eigen::MatrixXd surface = generateRandomSurface(Phi, n, m);
 
-
     // Save the surface to a file
     SaveSurfaceToFile(surface, "surface.dat");
-
 
     // Initial guess for the pressure
     Eigen::MatrixXd P_initial = Eigen::MatrixXd::Constant(n, m, W / S);
@@ -396,22 +413,15 @@ int main(){
 
     // Update the pressure field
     double tol = 1e-6;
-    int maxIter = 1000;
-    int k = 0;
+    int maxIter = 1000;       
     double error = std::numeric_limits<double>::infinity();
+    int k = 0;
 
+    //Compute the displacement field by energy minimization
+    Eigen::MatrixXd displacement = computeDisplacment(surface, P_initial, kernel_fourier, W, S, error, tol, k, maxIter);
 
-    // energy minimization
-    minimizeEnergy(surface, P_initial, kernel_fourier, W, S, error, tol, k, maxIter);
-
-
-
-
-
-
-
-
-
+    //Save displacement to a file
+    SaveSurfaceToFile(displacement, "displacement.dat");
 
     return 0;
 
