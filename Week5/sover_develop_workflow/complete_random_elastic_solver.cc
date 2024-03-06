@@ -50,6 +50,48 @@ int sign(double value);
 // Function to define the alpha value
 double alphavalue(double alpha, const Eigen::MatrixXd& P, double W, double S);
 
+
+    // Define the q value
+    Eigen::MatrixXd q = computeQValues(Q_x, Q_y);
+
+    // Define the piecewise function phi(q)
+    double phi_0 = 1.0;
+    double q_l = 2*M_PI/L;
+    double q_r = 2*M_PI/L;
+    double q_s = 2*M_PI*25/L;
+    double H = 0.8;
+    Eigen::MatrixXd Phi = phi(q, phi_0, q_l, q_r, q_s, H);
+
+    // Generate random phase and white noise
+    Eigen::MatrixXd surface = generateRandomSurface(Phi, n, m);
+
+    // Save the surface to a file
+    SaveSurfaceToFile(surface, "surface.dat");
+
+    // Initial guess for the pressure
+    Eigen::MatrixXd P_initial = Eigen::MatrixXd::Constant(n, m, W / S);
+
+    // Generate kernel function
+    Eigen::MatrixXd kernel_fourier = generateKernel(Q_x, Q_y, E_star);
+
+    // Update the pressure field
+    double tol = 1e-6;
+    int maxIter = 1000;       
+    double error = std::numeric_limits<double>::infinity();
+    int k = 0;
+
+    //Compute the displacement field by energy minimization
+    Eigen::MatrixXd displacement = computeDisplacment(surface, P_initial, kernel_fourier, W, S, error, tol, k, maxIter);
+
+    //Save displacement to a file
+    SaveSurfaceToFile(displacement, "displacement.dat");
+
+    return 0;
+
+}
+
+
+
 // Function to find the alpha value for steepest descent algorithm energy minimization
 double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol, double S);
 
@@ -189,7 +231,7 @@ Eigen::MatrixXd generateRandomSurface(const Eigen::MatrixXd& phiValues, int n, i
     // Apply the filter
     #pragma omp parallel for collapse(2)
     for (int i=0; i < n; ++i) {
-        for (int j=0; j < m/2 + 1; ++j) { ////??????
+        for (int j=0; j < m/2 + 1; ++j) {
             int index = i * (m/2 + 1)+ j;
             double filter = std::sqrt(phiValues(i, j));
             fftOutput[index][0] *= filter; // Real part
@@ -298,15 +340,15 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
     // Allocate memory for the pressure field, gap function and displacement field
     fftw_complex* P_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
     fftw_complex* G_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
-    fftw_complex* displacement_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
+    //fftw_complex* displacement_fourier = (fftw_complex*)fftw_malloc(n * (m/2+1)* sizeof(fftw_complex));
 
     // G
     Eigen::MatrixXd G = Eigen::MatrixXd::Zero(n, m);
 
     // Displacement
-    Eigen::MatrixXd displacement = Eigen::MatrixXd::Zero(n, m);
+    //Eigen::MatrixXd displacement = Eigen::MatrixXd::Zero(n, m);
 
-    // Map the pressure field, gap function and displacement field to Eigen matrices
+    // Map the pressure field, gap function and pressure field to Eigen matrices
     Eigen::Map<Eigen::MatrixXcd> G_(reinterpret_cast<std::complex<double>*>(G_fourier), n, m/2+1);
     Eigen::Map<Eigen::MatrixXcd> P_(reinterpret_cast<std::complex<double>*>(P_fourier), n, m/2+1);
 
@@ -324,11 +366,7 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
 
         // Apply kernel in Fourier domain and perform inverse FFT to get G
         // Note: Actual application of kernel_fourier and inverse FFT needed    
-        int N = n * (m/2 + 1);
-        #pragma omp parallel for
-        for (int i = 0; i < N; ++i) {
-            G_[i] = P_[i] * kernel_fourier[i];
-        }
+        G_ = P_.cwiseProduct(kernel_fourier);
 
         // Execute the backward plan
         fftw_execute(p_backward);        
