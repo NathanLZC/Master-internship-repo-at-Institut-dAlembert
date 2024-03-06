@@ -23,16 +23,7 @@ y0 = 1
 
 
 
-
-
-h_pofile =  
-
-
-
-
-
-
-
+h_pofile =  np.loadtxt("displacement.dat")
 
 
 
@@ -124,6 +115,8 @@ G = G - np.min(G)
 
 displacement_fourier = P_fourier * kernel_fourier
 displacement = np.fft.ifft2(displacement_fourier, norm='ortho').real
+
+np.savetxt("displacement_python.dat", displacement)
 
 # Plot the pressure field
 plt.figure(figsize=(10, 8))

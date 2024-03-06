@@ -435,3 +435,11 @@ int main(){
 }
 
 
+/*
+(base) zli@dionysos:~/Master-internship-repo-at-Institut-dAlembert/build$ make
+Consolidate compiler generated dependencies of target solver_cpp
+[100%] Built target solver_cpp
+(base) zli@dionysos:~/Master-internship-repo-at-Institut-dAlembert/build$ ./solver_cpp 
+solver_cpp: /gagarine/temporaires/zli/eigen-3.4.0/Eigen/src/Core/PlainObjectBase.h:366: void Eigen::PlainObjectBase<Derived>::resizeLike(const Eigen::EigenBase<OtherDerived>&) [with OtherDerived = Eigen::Matrix<double, -1, -1>; Derived = Eigen::Matrix<double, -1, 1>]: Assertion `other.rows() == 1 || other.cols() == 1' failed.
+Abandon (core dumped)
+*/
