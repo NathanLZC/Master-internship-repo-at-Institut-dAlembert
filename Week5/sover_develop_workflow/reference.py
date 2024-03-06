@@ -23,7 +23,7 @@ y0 = 1
 
 
 
-h_pofile =  np.loadtxt("displacement.dat")
+h_profile =  np.loadtxt("displacement.dat")
 
 
 
