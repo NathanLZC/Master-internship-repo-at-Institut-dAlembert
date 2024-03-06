@@ -3,9 +3,9 @@
 #include <vector>
 #include <algorithm> // for std::max
 #include <numeric> // for std::accumulate
-#include </gagarine/temporaires/zli/fftw/include/fftw3.h>
+#include <fftw3.h>
 #include <omp.h>
-#include </gagarine/temporaires/zli/eigen-3.4.0/Eigen/Dense>
+#include <Eigen/Dense>
 #include <random> // for std::random_device, std::mt19937, std::normal_distribution
 #include <fstream> // for std::ofstream
 
@@ -48,7 +48,7 @@ std::vector<int> sign(const std::vector<T>& v);
 int sign(double value);
 
 // Function to define the alpha value
-double alphavalue(double alpha, const Eigen::MatrixXd& P, double W, double S);
+double alphavalue(double alpha, const Eigen::MatrixXd& P, double W, double S){
 
 
     // Define the q value
