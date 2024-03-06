@@ -4,7 +4,7 @@
 #include <algorithm> // for std::max
 #include <numeric> // for std::accumulate
 #include <fftw3.h>
-#include <omp.h>
+#include <omp.h> //#include </opt/homebrew/Cellar/libomp/18.1.0/include/omp.h> // for Macbook
 #include <Eigen/Dense>
 #include <random> // for std::random_device, std::mt19937, std::normal_distribution
 #include <fstream> // for std::ofstream
