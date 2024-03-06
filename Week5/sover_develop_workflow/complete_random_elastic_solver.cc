@@ -3,9 +3,9 @@
 #include <vector>
 #include <algorithm> // for std::max
 #include <numeric> // for std::accumulate
-#include <fftw3.h>
+#include </gagarine/temporaires/zli/fftw/include/fftw3.h>
 #include <omp.h> //#include </opt/homebrew/Cellar/libomp/18.1.0/include/omp.h> // for Macbook
-#include <Eigen/Dense>
+#include </gagarine/temporaires/zli/eigen-3.4.0/Eigen/Dense>
 #include <random> // for std::random_device, std::mt19937, std::normal_distribution
 #include <fstream> // for std::ofstream
 
@@ -48,49 +48,7 @@ std::vector<int> sign(const std::vector<T>& v);
 int sign(double value);
 
 // Function to define the alpha value
-double alphavalue(double alpha, const Eigen::MatrixXd& P, double W, double S){
-
-
-    // Define the q value
-    Eigen::MatrixXd q = computeQValues(Q_x, Q_y);
-
-    // Define the piecewise function phi(q)
-    double phi_0 = 1.0;
-    double q_l = 2*M_PI/L;
-    double q_r = 2*M_PI/L;
-    double q_s = 2*M_PI*25/L;
-    double H = 0.8;
-    Eigen::MatrixXd Phi = phi(q, phi_0, q_l, q_r, q_s, H);
-
-    // Generate random phase and white noise
-    Eigen::MatrixXd surface = generateRandomSurface(Phi, n, m);
-
-    // Save the surface to a file
-    SaveSurfaceToFile(surface, "surface.dat");
-
-    // Initial guess for the pressure
-    Eigen::MatrixXd P_initial = Eigen::MatrixXd::Constant(n, m, W / S);
-
-    // Generate kernel function
-    Eigen::MatrixXd kernel_fourier = generateKernel(Q_x, Q_y, E_star);
-
-    // Update the pressure field
-    double tol = 1e-6;
-    int maxIter = 1000;       
-    double error = std::numeric_limits<double>::infinity();
-    int k = 0;
-
-    //Compute the displacement field by energy minimization
-    Eigen::MatrixXd displacement = computeDisplacment(surface, P_initial, kernel_fourier, W, S, error, tol, k, maxIter);
-
-    //Save displacement to a file
-    SaveSurfaceToFile(displacement, "displacement.dat");
-
-    return 0;
-
-}
-
-
+double alphavalue(double alpha, const Eigen::MatrixXd& P, double W, double S);
 
 // Function to find the alpha value for steepest descent algorithm energy minimization
 double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol, double S);
@@ -290,10 +248,6 @@ double alphavalue(double alpha,const Eigen::MatrixXd& P, double W, double S) {
 
 
 
-
-
-
-
 double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol, double S) {
 
     // Expanding the search range if alpha_l and alpha_r do not bound a root
@@ -302,7 +256,7 @@ double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, 
         // Optionally, you could throw an exception or handle the error if bounds are incorrect
     }
 
-    // Midpoint
+    // Bisection method
     double alpha_c = (alpha_l + alpha_r) / 2.0;
 
     // Checking if the midpoint satisfies the tolerance condition
@@ -364,8 +318,7 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
         fftw_execute(p_forward);
 
 
-        // Apply kernel in Fourier domain and perform inverse FFT to get G
-        // Note: Actual application of kernel_fourier and inverse FFT needed    
+        // Apply kernel in Fourier domain and perform inverse FFT 
         G_ = P_.cwiseProduct(kernel_fourier);
 
         // Execute the backward plan
