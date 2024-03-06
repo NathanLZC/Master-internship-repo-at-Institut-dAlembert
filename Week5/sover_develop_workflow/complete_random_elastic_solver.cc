@@ -35,17 +35,20 @@ Eigen::MatrixXd generateRandomSurface(const Eigen::MatrixXd& phiValues, int n, i
 void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filename);
 
 // Function to compute the mean of a vector
-/*
 template<typename T>
-//double mean(std::vector<T>& v, double n);
-*/
+double mean(const std::vector<T>& v);
+
 
 // Function to compute the sign of a vector
+/*
 template<typename T>
 std::vector<int> sign(const std::vector<T>& v);
+*/
+
+int sign(double value);
 
 // Function to define the alpha value
-std::vector<int> alphavalue(double alpha, Eigen::MatrixXd& P, double W, double S);
+double alphavalue(double alpha, const Eigen::MatrixXd& P, double W, double S);
 
 // Function to find the alpha value for steepest descent algorithm energy minimization
 double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol, double S);
@@ -144,6 +147,7 @@ Eigen::MatrixXd phi(const Eigen::MatrixXd& q, double phi_0, double q_l, double q
             }
         }
     }
+    return result;
 }
 
 // Implementation to generate white noise//https://cplusplus.com/reference/random/mt19937/
@@ -220,40 +224,26 @@ void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filena
 }
 
 
-/*
+
 template<typename T>
-double mean(std::vector<T>& v, double n) {
-    T sum = std::accumulate(v.begin(), v.end(), T(0)) + n * v.size();
+double mean(const std::vector<T>& v) {
+    T sum = std::accumulate(v.begin(), v.end(), T(0));
     return sum / static_cast<double>(v.size());
 }
-*/
+
 
 //sign function
-template<typename T>
-std::vector<int> sign(const std::vector<T>& v) {
-    std::vector<int> signs(v.size());
-    for(size_t i = 0; i < v.size(); ++i) {
-        signs[i] = (v[i] > T(0)) - (v[i] < T(0));
-    }
-    return signs;
+int sign(double value) {
+    return (value > 0) - (value < 0);
 }
-
-
-
 
 
 // Function to define the alpha value
-std::vector<double> alphavalue(double alpha, Eigen::MatrixXd& P, double W, double S) {
-    std::vector<double> result(P.rows() * P.cols());
-    #pragma omp parallel for collapse(2)
-    for(int i = 0; i < P.rows(); ++i) {
-        for(int j = 0; j < P.cols(); ++j) {
-            result[i * P.cols() + j] = (P(i, j) + alpha);
-        }
-    }
-    result += W;
-    result /= S;
-    return ;
+double alphavalue(double alpha,const Eigen::MatrixXd& P, double W, double S) {
+
+    double result = (P.array() + alpha).mean() - W / S;
+
+    return result;
 }
 
 
@@ -316,6 +306,7 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
     // Displacement
     Eigen::MatrixXd displacement = Eigen::MatrixXd::Zero(n, m);
 
+    // Map the pressure field, gap function and displacement field to Eigen matrices
     Eigen::Map<Eigen::MatrixXcd> G_(reinterpret_cast<std::complex<double>*>(G_fourier), n, m/2+1);
     Eigen::Map<Eigen::MatrixXcd> P_(reinterpret_cast<std::complex<double>*>(P_fourier), n, m/2+1);
 
@@ -330,12 +321,17 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
         // Execute the forward plan
         fftw_execute(p_forward);
 
-        //matrix multiplication with blas library
-        G_ = P_.array() * kernel_fourier.array();
 
-        
         // Apply kernel in Fourier domain and perform inverse FFT to get G
-        // Note: Actual application of kernel_fourier and inverse FFT needed
+        // Note: Actual application of kernel_fourier and inverse FFT needed    
+        int N = n * (m/2 + 1);
+        #pragma omp parallel for
+        for (int i = 0; i < N; ++i) {
+            G_[i] = P_[i] * kernel_fourier[i];
+        }
+
+        // Execute the backward plan
+        fftw_execute(p_backward);        
         
         // Subtract h_profile from G
         G = G - surface;
@@ -358,9 +354,6 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
         std::cout << "Error: " << error << ", Iteration: " << k << std::endl;
         
         k++;  // Increment the iteration counter
-
-
-
 
     }
 
