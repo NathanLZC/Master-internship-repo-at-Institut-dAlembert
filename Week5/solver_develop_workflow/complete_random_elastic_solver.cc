@@ -311,6 +311,15 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
     fftw_plan p_forward = fftw_plan_dft_r2c_2d(n, m, P.data(), P_fourier, FFTW_ESTIMATE);
     fftw_plan p_backward = fftw_plan_dft_c2r_2d(n, m, G_fourier, G.data(), FFTW_ESTIMATE);
 
+
+    //Adapted Kernel, only contains (n*m/2+1) to match the size of P_
+
+
+    //Adapted Kernel
+
+
+
+
     while (std::abs(error) > tol && k < maxIter) {
 
 
@@ -319,7 +328,11 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
 
 
         // Apply kernel in Fourier domain and perform inverse FFT 
-        G_ = P_.cwiseProduct(kernel_fourier);// is this correct? the size of kernel_fourier is n*m, the size of P_ is n*(m/2+1)
+        //G_ = P_.cwiseProduct(kernel_fourier);// is this correct? the size of kernel_fourier is n*m, the size of P_ is n*(m/2+1)
+        G_ = P_.cwiseProduct(kernel_fourier.block(0, 0, n, m/2+1));
+        //This code extracts a block (submatrix) from the kernel_fourier matrix, starting at the top-left corner (0,0), with a height of n and a width of m/2+1. 
+        //This size matches the result of the FFTW real-to-complex transformation, ensuring compatibility with the dimensions of P_.
+
 
         // Execute the backward plan
         fftw_execute(p_backward);        
