@@ -319,7 +319,7 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
 
 
         // Apply kernel in Fourier domain and perform inverse FFT 
-        G_ = P_.cwiseProduct(kernel_fourier);
+        G_ = P_.cwiseProduct(kernel_fourier);// is this correct? the size of kernel_fourier is n*m, the size of P_ is n*(m/2+1)
 
         // Execute the backward plan
         fftw_execute(p_backward);        
