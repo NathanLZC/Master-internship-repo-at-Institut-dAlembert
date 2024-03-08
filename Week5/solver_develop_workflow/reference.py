@@ -23,7 +23,8 @@ y0 = 1
 
 
 
-h_profile =  np.loadtxt("displacement.dat")
+
+h_profile =  np.loadtxt("surface.dat")
 
 
 
@@ -48,9 +49,9 @@ kernel_fourier[0, 0] = 0  # Avoid division by zero at the zero frequency
 
 # Initialize variables for the iteration
 tol = 1e-6  # Tolerance for convergence
-iter_max = 10000  # Maximum number of iterations
+iter_max = 10000  # Maximum number of iterationst
 k = 0  # Iteration counter
-error = np.inf  # Initialize error
+error = np.inf # Error measure intialization as infinity
 
 
 def find_alpha_0(P, W, alpha_l, alpha_r, tol):
@@ -81,6 +82,8 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
         # case where m is an improvement on b. 
         # Make recursive call with b = m
         return find_alpha_0(P, W, alpha_l, alpha_c, tol)
+    
+    P += alpha_c
 
 
 while np.abs(error) > tol and k < iter_max:
@@ -94,17 +97,19 @@ while np.abs(error) > tol and k < iter_max:
     P = P - G
     
     # Ensure P is non-negative
-    P = np.maximum(P, 0)
+    #P = np.maximum(P, 0)
     
     # Adjust P to satisfy the total load constraint
     alpha_0 = find_alpha_0(P, W/S, -np.max(P), W, tol)
     #alpha_0 = find_alpha_0(P, W, -1e2, 1e2, 1e-6)
-    P += alpha_0
+
+    #P += alpha_0                                               # We update the pressure field inside find_alpha_0 function
+
     P[P < 0] = 0
     
     # Calculate the error for convergence checking
     error = np.vdot(P, (G - np.min(G))) / (P.size*W) #/ np.linalg.norm(h_matrix)
-    print(error, k)
+    print(error, k, np.mean(P))
     
     k += 1  # Increment the iteration counter
 

@@ -120,7 +120,7 @@ void GenerateFrequencyMeshgrid(Eigen::VectorXd& q_x, Eigen::VectorXd& q_y,Eigen:
 }
 
 // Implementation of function to define the q value
-Eigen::MatrixXd computeQValues(const Eigen::VectorXd& Q_x, const Eigen::VectorXd& Q_y){
+Eigen::MatrixXd computeQValues(const Eigen::MatrixXd& Q_x, const Eigen::MatrixXd& Q_y){
     Eigen::MatrixXd result(Q_x.rows(), Q_x.cols());
     #pragma omp parallel for collapse(2)
     for(int i = 0; i < Q_x.rows(); ++i) {
@@ -267,8 +267,15 @@ double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, 
     } else {
         return findAlpha0(P, W, alpha_l, alpha_c, tol, S); // Narrowing the search to the left half
     }
+
+
+    P.array() += alpha_c;
+    P.array() *= (P.array() > 0).cast<double>();
+
+
+
+
     
-    return 0.0;
 }
 
 //inplementation of the kernel function
@@ -344,18 +351,24 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
         P = P - G;
         
         // Ensure P is non-negative
-        P = P.cwiseMax(0.0);
+        //P = P.cwiseMax(0.0);
         
         // Adjust P to satisfy the total load constraint
-        double alpha_0 = findAlpha0(P, W / S, P.minCoeff(), W, tol, S);
+        double alpha_0 = findAlpha0(P, W, -P.maxCoeff(), W, tol, S);
+
+        /*
         P.array() += alpha_0;
-        P = P.cwiseMax(0.0);
-        
+        P.array() *= (P.array() > 0).cast<double>();
+        */
+
+
+
+
         // Calculate the error for convergence checking
         // This is a simplified version; adjust as needed
         error = (P.array() * (G.array() - G.minCoeff())).sum() / (P.size() * W);
         
-        std::cout << "Error: " << error << ", Iteration: " << k << std::endl;
+        std::cout << "Error: " << error << ", Iteration: " << k << ", " << P.mean() << std::endl;
         
         k++;  // Increment the iteration counter
 
