@@ -62,7 +62,7 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
     
     # check if a and b bound a root
     def f(alpha):
-        return np.mean(P + alpha) - W/S
+        return np.mean(np.maximum(P + alpha, 0)) - W/S
 
     while np.sign(f(alpha_l)) == np.sign(f(alpha_r)):
         alpha_r *= 2
@@ -73,10 +73,6 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
 
     if np.abs(f(alpha_c)) < tol:
         # stopping condition, report alpha_c as root
-
-        P += alpha_c
-
-
         return alpha_c
     elif np.sign(f(alpha_l)) == np.sign(f(alpha_c)):
         # case where m is an improvement on a. 
@@ -107,7 +103,7 @@ while np.abs(error) > tol and k < iter_max:
     alpha_0 = find_alpha_0(P, W/S, -np.max(P), W, tol)
     #alpha_0 = find_alpha_0(P, W, -1e2, 1e2, 1e-6)
 
-    #P += alpha_0                                               # We update the pressure field inside find_alpha_0 function
+    P += alpha_0                                               # We update the pressure field inside find_alpha_0 function
 
     P[P < 0] = 0
     

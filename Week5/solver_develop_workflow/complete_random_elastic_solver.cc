@@ -240,8 +240,9 @@ int sign(double value) {
 
 // Function to define the alpha value
 double alphavalue(double alpha,const Eigen::MatrixXd& P, double W, double S) {
-
-    double result = (P.array() + alpha).mean() - W / S;
+    Eigen::ArrayXd P_temp = P.array() + alpha;
+    P_temp *= (P_temp > 0).cast<double>(); 
+    double result = P_temp.mean() - W / S;
 
     return result;
 }
@@ -267,14 +268,6 @@ double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, 
     } else {
         return findAlpha0(P, W, alpha_l, alpha_c, tol, S); // Narrowing the search to the left half
     }
-
-
-    P.array() += alpha_c;
-    P.array() *= (P.array() > 0).cast<double>();
-
-
-
-
     
 }
 
@@ -360,9 +353,6 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
         P.array() += alpha_0;
         P.array() *= (P.array() > 0).cast<double>();
         */
-
-
-
 
         // Calculate the error for convergence checking
         // This is a simplified version; adjust as needed

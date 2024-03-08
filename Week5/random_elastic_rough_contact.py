@@ -101,7 +101,8 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
     
     # check if a and b bound a root
     def f(alpha):
-        return np.mean(P + alpha) - W/S
+        #return np.mean(P + alpha) - W/S
+        return np.mean(np.maximum(P + alpha, 0)) - W/S
 
     while np.sign(f(alpha_l)) == np.sign(f(alpha_r)):
         alpha_r *= 2
@@ -121,8 +122,7 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
         # case where m is an improvement on b. 
         # Make recursive call with b = m
         return find_alpha_0(P, W, alpha_l, alpha_c, tol)
-    
-    P += alpha_c
+
 
 
 while np.abs(error) > tol and k < iter_max:
@@ -139,14 +139,14 @@ while np.abs(error) > tol and k < iter_max:
     #P = np.maximum(P, 0)
     
     # Adjust P to satisfy the total load constraint
-    alpha_0 = find_alpha_0(P, W/S, -np.max(P), W, tol)
+    alpha_0 = find_alpha_0(P, W, -np.max(P), W, tol)
     #alpha_0 = find_alpha_0(P, W, -1e2, 1e2, 1e-6)
-    #P += alpha_0                                               # We update the pressure field inside find_alpha_0 function
+    P += alpha_0                                               # We update the pressure field inside find_alpha_0 function
     P[P < 0] = 0
     
     # Calculate the error for convergence checking
     error = np.vdot(P, (G - np.min(G))) / (P.size*W) #/ np.linalg.norm(h_matrix)
-    print(error, k)
+    print(error, k, np.mean(P))
     
     k += 1  # Increment the iteration counter
 
