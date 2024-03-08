@@ -73,6 +73,10 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
 
     if np.abs(f(alpha_c)) < tol:
         # stopping condition, report alpha_c as root
+
+        P += alpha_c
+
+
         return alpha_c
     elif np.sign(f(alpha_l)) == np.sign(f(alpha_c)):
         # case where m is an improvement on a. 
@@ -83,7 +87,7 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
         # Make recursive call with b = m
         return find_alpha_0(P, W, alpha_l, alpha_c, tol)
     
-    P += alpha_c
+    
 
 
 while np.abs(error) > tol and k < iter_max:
