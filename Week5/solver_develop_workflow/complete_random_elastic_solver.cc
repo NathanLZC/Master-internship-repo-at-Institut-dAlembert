@@ -298,7 +298,7 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
 
         // Calculate the error for convergence checking
         // This is a simplified version; adjust as needed
-        error = (P.array() * (G.array() - G.minCoeff())).sum() / (surface.size() * hrms * W);
+        error = (P.array() * (G.array() - G.minCoeff())).sum() / (surface.size() * hrms * W);//need to define hrms
         
         std::cout << "Error: " << error << ", Iteration: " << k << ", " << P.mean() << std::endl;
         
