@@ -51,7 +51,7 @@ int sign(double value);
 double alphavalue(double alpha, const Eigen::MatrixXd& P, double W, double S);
 
 // Function to find the alpha value for steepest descent algorithm energy minimization
-double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol, double S);
+double findAlpha0(const Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol, double S);
 
 // Generate kernel function
 Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd& QY, double E_star);
@@ -102,7 +102,7 @@ Eigen::VectorXd fftfreq(int n, double d){
             result(i) = (i - n) / (N * d);
         }
     }
-    return result;
+    return result * 2 * M_PI;
 }
 
 void GenerateFrequencyMeshgrid(Eigen::VectorXd& q_x, Eigen::VectorXd& q_y,Eigen::MatrixXd& Q_x, Eigen::MatrixXd& Q_y, double L, int n, int m){
@@ -210,7 +210,7 @@ Eigen::MatrixXd generateRandomSurface(const Eigen::MatrixXd& phiValues, int n, i
     //fftw_free(fftInput);
     fftw_free(fftOutput);
 
-    return surface;
+    return surface*std::sqrt(n*m);
 }
 
 void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filename){
@@ -240,7 +240,7 @@ int sign(double value) {
 
 // Function to define the alpha value
 double alphavalue(double alpha,const Eigen::MatrixXd& P, double W, double S) {
-    Eigen::ArrayXd P_temp = P.array() + alpha;
+    Eigen::ArrayXXd P_temp = P.array() + alpha;
     P_temp *= (P_temp > 0).cast<double>(); 
     double result = P_temp.mean() - W / S;
 
@@ -249,7 +249,7 @@ double alphavalue(double alpha,const Eigen::MatrixXd& P, double W, double S) {
 
 
 
-double findAlpha0(Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol, double S) {
+double findAlpha0(const Eigen::MatrixXd& P, double W, double alpha_l, double alpha_r, double tol, double S) {
 
     // Expanding the search range if alpha_l and alpha_r do not bound a root
     while (sign(alphavalue(alpha_l, P, W, S)) == sign(alphavalue(alpha_r, P, W, S))) {
@@ -279,7 +279,7 @@ Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd&
         for(int j = 0; j < QX.cols(); ++j) {
             if (!(i == 0 && j == 0)) {
                 double qMagnitude = std::sqrt(QX(i, j) * QX(i, j) + QY(i, j) * QY(i, j));
-                kernel_fourier(i, j) = 2 / (E_star * qMagnitude);
+                kernel_fourier(i, j) = 2 / (E_star * qMagnitude) / kernel_fourier.size();
             }
         }
     }
@@ -349,14 +349,14 @@ Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::Matrix
         // Adjust P to satisfy the total load constraint
         double alpha_0 = findAlpha0(P, W, -P.maxCoeff(), W, tol, S);
 
-        /*
+        
         P.array() += alpha_0;
         P.array() *= (P.array() > 0).cast<double>();
-        */
+        
 
         // Calculate the error for convergence checking
         // This is a simplified version; adjust as needed
-        error = (P.array() * (G.array() - G.minCoeff())).sum() / (P.size() * W);
+        error = (P.array() * (G.array() - G.minCoeff())).sum() / (surface.size() * hrms * W);
         
         std::cout << "Error: " << error << ", Iteration: " << k << ", " << P.mean() << std::endl;
         

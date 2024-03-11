@@ -62,7 +62,7 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
     
     # check if a and b bound a root
     def f(alpha):
-        return np.mean(np.maximum(P + alpha, 0)) - W/S
+        return np.mean(np.maximum(P + alpha, 0)) - W
 
     while np.sign(f(alpha_l)) == np.sign(f(alpha_r)):
         alpha_r *= 2
