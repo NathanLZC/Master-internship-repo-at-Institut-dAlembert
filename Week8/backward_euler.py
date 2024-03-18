@@ -44,6 +44,11 @@ gamma = (eta_1/G_0/dt)/(1+G_1/G_0+eta_1/G_0/dt)
 
 H_old = 1
 
+#############################
+##Q3: how to give an initial value for U and M?
+############
+
+
 def solve_U()
 
 for t in np.arange(t0, t1, dt):
