@@ -24,42 +24,66 @@ dt = (t1 - t0)/1000
 ##load(constant)
 W = 1000
 
-# Partial displacement
-M = 1e-3  # m
+#domain size
+R = 1  # Radius of demi-sphere
+L = 2  # Domain size
+S = L**2  # Domain area
+
+# Generate a 2D coordinate space
+n = 300
+m = 300
 
 
 #######################################
-###Q1: if we let k=1, what result do we espect?
+###if we let k=1, we can compare the real contact area with hertz solution at t=0 and t>>\tau_0
 #######################################
-###Q2: for a general case, I should define alpha, beta, gamma function and use
-###    discretization points as the value of k.
-#######################################
+k = 1
 
 alpha = G_inf + (G_1 + eta_1/dt)/(1 + G_1/G_0 + eta_1/G_0/dt)
+#print(alpha)
+
+'''
+G_1_i = G_1
+G_0_i = G_0
+eta_i = eta_1
+for i in range(0, k):
+    alpha = G_inf + (G_1_i + eta_i/dt)/(1 + G_1_i/G_0_i + eta_i/G_0_i/dt)
+print(alpha)
+'''
 
 beta = (eta_1/dt)/(1+G_1/G_0+eta_1/G_0/dt)
+#print(beta)
+
+'''
+G_1_i = G_1
+G_0_i = G_0
+eta_i = eta_1
+for i in range(0, k):
+    beta = (eta_i/dt)/(1+G_1_i/G_0_i+eta_i/G_0_i/dt)
+print(beta)
+'''
 
 gamma = (eta_1/G_0/dt)/(1+G_1/G_0+eta_1/G_0/dt)
+#print(gamma)
+
+'''
+G_1_i = G_1
+G_0_i = G_0
+eta_i = eta_1
+gamma = (eta_i/G_0_i/dt)/(1+G_1_i/G_0_i+eta_i/G_0_i/dt)
+print(gamma)
+'''
+
+H_old = np.loadtxt("surface.dat")
 
 
-H_old = 1
 
-#############################
-##Q3: how to give an initial value for U and M?
-############
-
-
-def solve_U()
-
-for t in np.arange(t0, t1, dt):
+for t in range(t0, t1, dt):
 
     H_new = alpha*H_old + beta*W + gamma*M
+'''
 
 
-'''
-#surface profile
-h_profile =  np.loadtxt("surface.dat")
-'''
 
 
 
