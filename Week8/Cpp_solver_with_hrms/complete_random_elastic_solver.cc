@@ -238,16 +238,30 @@ Eigen::MatrixXd generateKernel(const Eigen::MatrixXd& QX, const Eigen::MatrixXd&
 }
 
 //Implementation of the RMS height function
+//#pragma omp parallel for collapse(2) reduction(+:sum,square_sum)
+//Use reduction(+:sum,square_sum) to ensure that multiple threads can safely accumulate 
+//the +:sum,square_sum variable while calculating. Each thread processes parts of 
+//the matrix, computing the sum of their respective parts, and the sums of 
+//these parts are combined into a sum through addition and then reduction operations.
+/*
+https://zh.wikipedia.org/zh-cn/%E6%A8%99%E6%BA%96%E5%B7%AE
+$\begin{aligned} \sigma & =\sqrt{\frac{1}{N} \sum_{i=1}^N\left(X_i-\mu\right)^2} \\ & =\sqrt{\frac{1}{N}\left(\sum_{i=1}^N X_i^2\right)-\frac{1}{N} N \mu^2} \\ & =\sqrt{\frac{\sum_{i=1}^N X_i^2}{N}-\mu^2}\end{aligned}$
+*/
 double computeRMSHeight(const Eigen::MatrixXd& surface){
-    double h_rms = 0;
-    #pragma omp parallel for collapse(2) reduction(+:h_rms)//reduction(+:h_rms) is used to avoid 
+    double sum = 0;
+    double square_sum = 0;
+    #pragma omp parallel for collapse(2) reduction(+:sum,square_sum)
     for(int i = 0; i < surface.rows(); ++i) {
         for(int j = 0; j < surface.cols(); ++j) {
-            h_rms += surface(i, j) * surface(i, j);
+            sum += surface(i, j);
+            square_sum += surface(i, j) * surface(i, j);
         }
     }
-    return std::sqrt(h_rms / (surface.rows() * surface.cols()));
+
+    double mean = sum / (surface.rows() * surface.cols());
+    return std::sqrt(square_sum / (surface.rows() * surface.cols()) - mean * mean);
 }
+
 
 // Function to minimize the energy to compute the displacement field
 Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double W, double S, double error, double tol, int k, int maxIter){

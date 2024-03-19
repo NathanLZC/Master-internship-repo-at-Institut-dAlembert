@@ -130,7 +130,7 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
         return find_alpha_0(P, W, alpha_l, alpha_c, tol)
 
 #RMS height(Root Mean Square height) of the surface, often denoted as R_q or S_q
-h_rms = 
+h_rms = np.std(h_profile)
 
 while np.abs(error) > tol and k < iter_max:
     # Calculate the gradient G in the Fourier domain and transform it back to the spatial domain
@@ -152,7 +152,7 @@ while np.abs(error) > tol and k < iter_max:
     P[P < 0] = 0
     
     # Calculate the error for convergence checking
-    error = np.vdot(P, (G - np.min(G))) / (P.size*W) #/ np.linalg.norm(h_matrix)
+    error = np.vdot(P, (G - np.min(G))) / (surface.size*h_rms*W) #/ np.linalg.norm(h_matrix)
     print(error, k, np.mean(P))
     
     k += 1  # Increment the iteration counter

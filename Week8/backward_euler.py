@@ -33,7 +33,6 @@ S = L**2  # Domain area
 n = 300
 m = 300
 
-
 #######################################
 ###if we let k=1, we can compare the real contact area with hertz solution at t=0 and t>>\tau_0
 #######################################
@@ -79,6 +78,8 @@ H_old = np.loadtxt("surface.dat")
 
 
 for t in range(t0, t1, dt):
+
+    
 
     H_new = alpha*H_old + beta*W + gamma*M
 '''
