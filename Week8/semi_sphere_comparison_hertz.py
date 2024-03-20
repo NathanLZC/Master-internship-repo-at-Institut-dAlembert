@@ -164,7 +164,7 @@ plt.title('Displacement_Hertz Field')
 
 #plot the difference between the two displacement fields
 plt.figure(figsize=(10, 8))
-plt.imshow(u_z - displacement, cmap='viridis', origin='lower', extent=[0, L, 0, L])
+plt.imshow(displacement - np.max(displacement) - u_z, cmap='viridis', origin='lower', extent=[0, L, 0, L])
 plt.colorbar(label='Displacement (u_z)')
 plt.xlabel('x')
 plt.ylabel('y')
