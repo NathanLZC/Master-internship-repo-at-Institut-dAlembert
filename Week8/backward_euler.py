@@ -33,14 +33,15 @@ S = L**2  # Domain area
 n = 300
 m = 300
 
-def contact_solver(n, m, W, S, E_, h_profile, tol=1e-6, iter_max=10000):
+def contact_solver(n, m, W, S, G_t, h_profile, tol=1e-6, iter_max=10000):
+    
     # Define the kernel in the Fourier domain
     q_x = 2 * np.pi * np.fft.fftfreq(n, d=L/n)
     q_y = 2 * np.pi * np.fft.fftfreq(m, d=L/m)
     QX, QY = np.meshgrid(q_x, q_y)
 
     kernel_fourier = np.zeros_like(QX)
-    kernel_fourier = 2 / (E_ * np.sqrt(QX**2 + QY**2))
+    kernel_fourier = 2 / (G_t * np.sqrt(QX**2 + QY**2))
     kernel_fourier[0, 0] = 0  # Avoid division by zero at the zero frequency
 
     # Initial pressure distribution
@@ -102,7 +103,7 @@ def contact_solver(n, m, W, S, E_, h_profile, tol=1e-6, iter_max=10000):
         P[P < 0] = 0
         
         # Calculate the error for convergence checking
-        error = np.vdot(P, (G - np.min(G))) / (surface.size*h_rms*W) #/ np.linalg.norm(h_matrix)
+        error = np.vdot(P, (G - np.min(G))) / (h_profile.size*h_rms*W) #/ np.linalg.norm(h_matrix)
         print(error, k, np.mean(P))
         
         k += 1  # Increment the iteration counter
@@ -164,9 +165,15 @@ for t in range(t0, t1, dt):
 
     H_old = Surface
 
+    #effictive modulus
+    G_t = G_inf + G_1 * np.exp(-t/tau_0)
+
+    U_old = contact_solver(n, m, W, S, G_t, H_old, tol=1e-6, iter_max=10000)
+
 
     H_new = alpha*H_old + beta*W + gamma*M
-'''
+
+    
 
 
 
