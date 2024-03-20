@@ -159,21 +159,26 @@ print(gamma)
 
 Surface = np.loadtxt("surface.dat")
 
-
+H_old = Surface
 
 for t in range(t0, t1, dt):
-
-    H_old = Surface
-
+    #main step0: Update the effective modulus
     #effictive modulus
     G_t = G_inf + G_1 * np.exp(-t/tau_0)
 
     U_old = contact_solver(n, m, W, S, G_t, H_old, tol=1e-6, iter_max=10000)
 
+    #main step1: Update the surface profile
+    H_new = alpha*H_old + beta*U_old + gamma*M_old
 
-    H_new = alpha*H_old + beta*W + gamma*M
+    #main step2: Update the displacement field
+    U_new = contact_solver(n, m, W, S, G_t, H_new, tol=1e-6, iter_max=10000)
+    ###????? how to update the loading field W_new
 
-    
+    #main step3: Update the partial displacement field
+    M_new = (G_0*dt/((G_0+G_1)*dt+eta_1))*(eta_1*M_old/G_0/dt + (G_1+eta_1/dt)*U_new-eta_1*U_old/dt)
+
+
 
 
 
