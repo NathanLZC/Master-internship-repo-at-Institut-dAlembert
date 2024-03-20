@@ -20,10 +20,14 @@ E_star = E / (1 - nu**2)  # Plane strain modulus
 # Generate a 2D coordinate space
 n = 300
 m = 300
-#x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))
+x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))
 
 x0 = 1
 y0 = 1
+
+# We define the distance from the center of the sphere
+r = np.sqrt((x-x0)**2 + (y-y0)**2)
+
 
 #we define the frequency with q_x and q_y
 q_x = 2 * np.pi * np.fft.fftfreq(n, d=L/n)
@@ -33,10 +37,7 @@ QX, QY = np.meshgrid(q_x, q_y)
 
 
 
-h_profile = 
-
-
-
+h_profile = -(r**2)/(2*R)
 
 
 
@@ -108,7 +109,7 @@ while np.abs(error) > tol and k < iter_max:
     P[P < 0] = 0
     
     # Calculate the error for convergence checking
-    error = np.vdot(P, (G - np.min(G))) / (surface.size*h_rms*W) #/ np.linalg.norm(h_matrix)
+    error = np.vdot(P, (G - np.min(G))) / (h_profile.size*h_rms*W) #/ np.linalg.norm(h_matrix)
     print(error, k, np.mean(P))
     
     k += 1  # Increment the iteration counter
@@ -137,3 +138,39 @@ plt.xlabel('x')
 plt.ylabel('y')
 plt.title('Displacement Field')
 plt.show()
+
+
+#######################################
+###Hertzian contact theory reference
+#######################################
+
+#Here we define p0 as the reference pressure
+p0 = (6*W*E_star**2/(np.pi**3*R**2))**(1/3)
+a = (3*W*R/(4*E_star))**(1/3)
+
+u_z = -(r**2)/(2*R)
+
+# Correctly applying the displacement outside the contact area
+outside_contact = r > a
+u_z_outside = -(r[outside_contact]**2)/(2*R) + a * np.sqrt(r[outside_contact]**2 - a**2)/(np.pi*R) + (r[outside_contact]**2-2*a**2)*np.arccos(a/r[outside_contact])/(np.pi*R)
+u_z[outside_contact] = u_z_outside
+
+#plot u_z
+plt.imshow(u_z, cmap='jet', origin='lower', extent=[0, L, 0, L])
+plt.colorbar(label='Displacement (u_z)')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Displacement_Hertz Field')
+
+#plot the difference between the two displacement fields
+plt.figure(figsize=(10, 8))
+plt.imshow(u_z - displacement, cmap='viridis', origin='lower', extent=[0, L, 0, L])
+plt.colorbar(label='Displacement (u_z)')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Displacement Field Difference')
+
+
+plt.show()
+
+
