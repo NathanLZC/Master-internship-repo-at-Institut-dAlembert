@@ -71,7 +71,10 @@ error = np.inf  # Initialize error
 
 
 while np.abs(error) > tol and k < iter_max:
-    
+    # try np.where(P > 0, 0, P) to find the contact area
+
+
+    # Calculate the gap G(as Gradient, see Lucas(2020)) in the Fourier domain and transform it back to the spatial domain
     P_fourier = np.fft.fft2(P, norm='ortho')
     G_fourier = P_fourier * kernel_fourier
     G = np.fft.ifft2(G_fourier, norm='ortho').real - h_profile

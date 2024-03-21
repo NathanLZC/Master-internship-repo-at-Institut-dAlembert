@@ -1,5 +1,3 @@
-Here's the algorithm described in the provided LaTeX style, formatted into Markdown with LaTeX math expressions:
-
 ### Algorithm 2: Polonsky and Keer (1999b) Constrained Conjugate Gradient Algorithm.
 
 **Inputs:** normal total load $W$, surface profile $\mathbf{H}$, tolerance $\varepsilon$, maximum number of iterations $N_{\text{max}}$.

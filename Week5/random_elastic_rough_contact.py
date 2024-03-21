@@ -127,7 +127,7 @@ def find_alpha_0(P, W, alpha_l, alpha_r, tol):
 h_rms = np.std(h_profile)
 
 while np.abs(error) > tol and k < iter_max:
-    # Calculate the gap G in the Fourier domain and transform it back to the spatial domain
+    # Calculate the gap G(as Gradient, see Lucas(2020)) in the Fourier domain and transform it back to the spatial domain
     P_fourier = np.fft.fft2(P, norm='ortho')
     G_fourier = P_fourier * kernel_fourier
     G = np.fft.ifft2(G_fourier, norm='ortho').real - h_profile
