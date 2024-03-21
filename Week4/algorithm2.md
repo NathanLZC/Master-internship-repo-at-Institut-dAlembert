@@ -48,6 +48,13 @@ Here's the algorithm described in the provided LaTeX style, formatted into Markd
 20. Compute the error $e$:
     $$ e \leftarrow \frac{\mathbf{P} \cdot (\mathbf{G} - \min(\mathbf{G}))}{W h_{\text{norm}}} $$
 21. Increment the iteration counter $k$:
+    $$ k = k + 1$$
+
+**After exiting the loop**:
+
+22. Ensure a positive gap by updating \( G \):
+    $$ G \leftarrow G - \min(G) $$
+
    
 
 

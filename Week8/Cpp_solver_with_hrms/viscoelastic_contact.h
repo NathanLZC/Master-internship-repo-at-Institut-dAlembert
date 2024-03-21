@@ -49,4 +49,12 @@ double computeRMSHeight(const Eigen::MatrixXd& surface);
 // Function to minimize the energy
 Eigen::MatrixXd computeDisplacment(const Eigen::MatrixXd& surface, Eigen::MatrixXd& P, Eigen::MatrixXd kernel_fourier, double W, double S, double error, double tol, int k, int maxIter);
 
+//////////////////////////////////////////
 //new function for the viscoelastic contact, first we consider one-branch model
+/////////////////////////////////////////
+
+
+// Function to update the surface
+Eigen::MatrixXd updateSurface(const Eigen::MatrixXd& surface, const Eigen::MatrixXd& displacement, const Eigen::MatrixXd& partial_displacement, const double alpha, const double beta, const double gamma);
+//??? shall we keep surface not const to save memory?
+
