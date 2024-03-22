@@ -78,7 +78,7 @@ def apply_integration_operator(Origin, kernel_fourier, h_profile):
     # Subtract h_profile from the filtered image
     result = Gradient - h_profile
 
-    return result
+    return result#true gradient
 
 
 
@@ -135,7 +135,8 @@ while np.abs(error) > tol and k < iter_max:
 
 
     # Enforce the applied force constraint
-    P = W * P / np.mean(P)
+    P = W * P / np.mean(P)## be wise here#############"
+    ##############################"
 
 
 
