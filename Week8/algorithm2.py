@@ -62,32 +62,80 @@ delta = 0
 
 # Initialize variables for the iteration
 tol = 1e-6  # Tolerance for convergence
-iter_max = 10000  # Maximum number of iterations
+iter_max = 10000  # Maximum number of iteratio, 0, Pns
 k = 0  # Iteration counter
 error = np.inf  # Initialize error
 
+def apply_integration_operator(Origin, kernel_fourier, h_profile):
+    # Compute the Fourier transform of the input image
+    Origin2fourier = np.fft.fft2(Origin, norm='ortho')
 
+    # Apply the filter in the Fourier domain
+    Gradient_fourier = Origin2fourier * kernel_fourier
+
+    # Compute the inverse Fourier transform to get the filtered image
+    Gradient = np.fft.ifft2(Gradient_fourier, norm='ortho').real
+
+    # Subtract h_profile from the filtered image
+    result = Gradient - h_profile
+
+    return result
 
 
 
 while np.abs(error) > tol and k < iter_max:
-    # try np.where(P > 0, 0, P) to find the contact area
+    # try np.where(P > 0) to find the contact area
+    S = P > 0
 
+    #encapsulate into a function
 
     # Calculate the gap G(as Gradient, see Lucas(2020)) in the Fourier domain and transform it back to the spatial domain
-    P_fourier = np.fft.fft2(P, norm='ortho')
-    G_fourier = P_fourier * kernel_fourier
-    G = np.fft.ifft2(G_fourier, norm='ortho').real - h_profile
+    #P_fourier = np.fft.fft2(P, norm='ortho')
+    #G_fourier = P_fourier * kernel_fourier
+    #G = np.fft.ifft2(G_fourier, norm='ortho').real - h_profile
+    ##function
+
+    G = apply_integration_operator(P, kernel_fourier, h_profile)
+
+    G -= G[S].mean()
+
+    G_norm = np.linalg.norm(G[S])**2
+
+    # Calculate the search direction
+    T[S] = G[S] - delta * G / G_old * T[S]
+
+    # Update G_old
+    G_old = G
+
+    # Set R
+    R = apply_integration_operator(T, kernel_fourier, h_profile)
+
+    R = R - R[S].mean()
+
+    # Calculate the step size tau
+    #######
+    ###Question is this a vector multiplication or element-wise multiplication?
+    #######
+    tau = np.dot(G[S], T[S]) / np.dot(R[S], T[S])
+
+    # Update P
+    P -= tau * T        
+    P[P < 0] = 0
+
+    # identify the inadmissible points
+    R = P = 0 & G < 0
+
+    if R == 0:
+        delta = 1
+    else:
+        delta = 0
+
+    # Apply positive pressure on inadmissible points       
+    P[R] -= tau * G[R]
 
 
-
-
-
-
-
-
-
-
+    # Enforce the applied force constraint
+    P = W * P / np.sum(P)
 
 
 

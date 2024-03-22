@@ -115,7 +115,7 @@ def contact_solver(n, m, W, S, G_t, h_profile, tol=1e-6, iter_max=10000):
     displacement_fourier = P_fourier * kernel_fourier
     displacement = np.fft.ifft2(displacement_fourier, norm='ortho').real
 
-    return displacement
+    return displacement, P
 
 #######################################
 ###if we let k=1, we can compare the real contact area with hertz solution at t=0 and t>>\tau_0
@@ -130,7 +130,8 @@ G_1_i = G_1
 G_0_i = G_0
 eta_i = eta_1
 for i in range(0, k):
-    alpha = G_inf + (G_1_i + eta_i/dt)/(1 + G_1_i/G_0_i + eta_i/G_0_i/dt)
+    alpha += (G_1_i + eta_i/dt)/(1 + G_1_i/G_0_i + eta_i/G_0_i/dt)
+alpha += G_inf
 print(alpha)
 '''
 
@@ -142,7 +143,7 @@ G_1_i = G_1
 G_0_i = G_0
 eta_i = eta_1
 for i in range(0, k):
-    beta = (eta_i/dt)/(1+G_1_i/G_0_i+eta_i/G_0_i/dt)
+    beta += (eta_i/dt)/(1+G_1_i/G_0_i+eta_i/G_0_i/dt)
 print(beta)
 '''
 
@@ -159,32 +160,30 @@ print(gamma)
 
 Surface = np.loadtxt("surface.dat")
 
-H_old = Surface
+U = np.zeros((n, m))
+M = np.zeros((n, m))
 
 for t in range(t0, t1, dt):
     #main step0: Update the effective modulus
     #effictive modulus
     G_t = G_inf + G_1 * np.exp(-t/tau_0)
 
-    U_old = contact_solver(n, m, W, S, G_t, H_old, tol=1e-6, iter_max=10000)
+    #E_star = G_t
+    E_star = 1.0#clarify to be constant on both sides to update the surface profile
 
     #main step1: Update the surface profile
-    H_new = alpha*H_old + beta*U_old + gamma*M_old
+    H_new = alpha*Surface + beta*U + gamma*M
 
     #main step2: Update the displacement field
-    U_new = contact_solver(n, m, W, S, G_t, H_new, tol=1e-6, iter_max=10000)
+    U, P = contact_solver(n, m, W, S, G_t, H_new, tol=1e-6, iter_max=10000)
     ###????? how to update the loading field W_new
 
+
+    A_c = np.mean(P > 0)
+
     #main step3: Update the partial displacement field
-    M_new = (G_0*dt/((G_0+G_1)*dt+eta_1))*(eta_1*M_old/G_0/dt + (G_1+eta_1/dt)*U_new-eta_1*U_old/dt)
+    M = (G_0*dt/((G_0+G_1)*dt+eta_1))*(eta_1*M /G_0/dt + (G_1+eta_1/dt)*U -eta_1*U/dt)
 
-
-
-
-
-
-
-
-
+displacement = U 
 
 
