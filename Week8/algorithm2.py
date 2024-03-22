@@ -54,8 +54,7 @@ T = np.zeros((n, m))
 h_rms = np.std(h_profile)
 
 #initialize G and G_old
-G = np.zeros((n, m))
-G_old = np.ones((n, m))
+G_old = 1
 
 #initialize delta
 delta = 0
@@ -102,10 +101,11 @@ while np.abs(error) > tol and k < iter_max:
     G_norm = np.linalg.norm(G[S])**2
 
     # Calculate the search direction
-    T[S] = G[S] - delta * G / G_old * T[S]
+    T[S] = G[S] + delta * G_norm / G_old * T[S]
+    ## size dont match
 
     # Update G_old
-    G_old = G
+    G_old = G_norm
 
     # Set R
     R = apply_integration_operator(T, kernel_fourier, h_profile)
@@ -123,9 +123,9 @@ while np.abs(error) > tol and k < iter_max:
     P[P < 0] = 0
 
     # identify the inadmissible points
-    R = P = 0 & G < 0
+    R = (P == 0) & (G < 0)
 
-    if R == 0:
+    if np.all(R==0):
         delta = 1
     else:
         delta = 0
@@ -135,7 +135,7 @@ while np.abs(error) > tol and k < iter_max:
 
 
     # Enforce the applied force constraint
-    P = W * P / np.sum(P)
+    P = W * P / np.mean(P)
 
 
 
