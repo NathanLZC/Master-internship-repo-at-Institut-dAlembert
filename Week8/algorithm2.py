@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Define the parameters
 W = 1e2  # Total load
-R = 1  # Radius of demi-sphere
+Radius = 1  # Radius of demi-sphere
 L = 2  # Domain size
 S = L**2  # Domain area
 
@@ -39,7 +39,7 @@ kernel_fourier = 2 / (E_star * np.sqrt(QX**2 + QY**2))
 kernel_fourier[0, 0] = 0  # Avoid division by zero at the zero frequency
 
 
-h_profile = -(r**2)/(2*R)
+h_profile = -(r**2)/(2*Radius)
 
 
 
@@ -78,7 +78,7 @@ def apply_integration_operator(Origin, kernel_fourier, h_profile):
     # Subtract h_profile from the filtered image
     result = Gradient - h_profile
 
-    return result#true gradient
+    return result, Origin2fourier#true gradient
 
 
 
@@ -94,7 +94,7 @@ while np.abs(error) > tol and k < iter_max:
     #G = np.fft.ifft2(G_fourier, norm='ortho').real - h_profile
     ##function
 
-    G = apply_integration_operator(P, kernel_fourier, h_profile)
+    G, P_fourier = apply_integration_operator(P, kernel_fourier, h_profile)
 
     G -= G[S].mean()
 
@@ -108,7 +108,7 @@ while np.abs(error) > tol and k < iter_max:
     G_old = G_norm
 
     # Set R
-    R = apply_integration_operator(T, kernel_fourier, h_profile)
+    R, T_fourier  = apply_integration_operator(T, kernel_fourier, h_profile)
 
     R = R - R[S].mean()
 
@@ -156,6 +156,8 @@ G = G - np.min(G)
 
 
 
+displacement_fourier = P_fourier * kernel_fourier
+displacement = np.fft.ifft2(displacement_fourier, norm='ortho').real
 
 
 
@@ -174,14 +176,14 @@ G = G - np.min(G)
 #######################################
 
 #Here we define p0 as the reference pressure
-p0 = (6*W*E_star**2/(np.pi**3*R**2))**(1/3)
-a = (3*W*R/(4*E_star))**(1/3)
+p0 = (6*W*E_star**2/(np.pi**3*Radius**2))**(1/3)
+a = (3*W*Radius/(4*E_star))**(1/3)
 
-u_z = -(r**2)/(2*R)
+u_z = -(r**2)/(2*Radius)
 
 # Correctly applying the displacement outside the contact area
 outside_contact = r > a
-u_z_outside = -(r[outside_contact]**2)/(2*R) + a * np.sqrt(r[outside_contact]**2 - a**2)/(np.pi*R) + (r[outside_contact]**2-2*a**2)*np.arccos(a/r[outside_contact])/(np.pi*R)
+u_z_outside = -(r[outside_contact]**2)/(2*Radius) + a * np.sqrt(r[outside_contact]**2 - a**2)/(np.pi*Radius) + (r[outside_contact]**2-2*a**2)*np.arccos(a/r[outside_contact])/(np.pi*Radius)
 u_z[outside_contact] = u_z_outside
 
 #plot u_z
