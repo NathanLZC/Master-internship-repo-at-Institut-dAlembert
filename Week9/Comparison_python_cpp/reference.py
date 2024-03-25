@@ -24,10 +24,13 @@ y0 = 1
 
 
 
-h_profile =  np.loadtxt("surface.dat")
+h_profile =  np.loadtxt("/gagarine/temporaires/zli/Master-internship-repo-at-Institut-dAlembert/build/surface.dat")
 
-
-
+plt.figure(figsize=(10, 8))
+plt.imshow(h_profile, cmap='viridis', origin='lower', extent=[0, L, 0, L])
+plt.colorbar()
+plt.title("Synthesized Rough Surface")
+plt.show()
 
 
 
@@ -101,7 +104,7 @@ while np.abs(error) > tol and k < iter_max:
     #P = np.maximum(P, 0)
     
     # Adjust P to satisfy the total load constraint
-    alpha_0 = find_alpha_0(P, W/S, -np.max(P), W, tol)
+    alpha_0 = find_alpha_0(P, W, -np.max(P), W, tol)
     #alpha_0 = find_alpha_0(P, W, -1e2, 1e2, 1e-6)
 
     P += alpha_0                                               # We update the pressure field inside find_alpha_0 function

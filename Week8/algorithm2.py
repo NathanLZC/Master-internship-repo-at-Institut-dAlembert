@@ -179,6 +179,10 @@ displacement = np.fft.ifft2(displacement_fourier, norm='ortho').real
 p0 = (6*W*E_star**2/(np.pi**3*Radius**2))**(1/3)
 a = (3*W*Radius/(4*E_star))**(1/3)
 
+
+print(a, p0)
+
+
 u_z = -(r**2)/(2*Radius)
 
 # Correctly applying the displacement outside the contact area

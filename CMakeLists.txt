@@ -22,7 +22,8 @@ link_libraries(fftw3 openblas)
 #add_executable(our_test hello_world_for_cpp_configure/test_for_fftw.cc)
 #add_executable(test_eigen Week5/test_eigen.cc)
 #add_executable(solver_cpp Week5/solver_develop_workflow/complete_random_elastic_solver.cc)
-add_executable(solver_cpp_2 Week8/Cpp_solver_with_hrms/complete_random_elastic_solver.cc)
+#add_executable(solver_cpp_2 Week8/Cpp_solver_with_hrms/complete_random_elastic_solver.cc)
+add_executable(solver_cpp_3 Week9/Comparison_python_cpp/complete_random_elastic_solver.cc)
 # 链接FFTW库到目标可执行文件
 #target_link_libraries(our_test fftw3)
 
