@@ -7,18 +7,18 @@ import matplotlib.pyplot as plt
 
 # Define the parameters
 W = 1e2  # Total load
-Radius = 1  # Radius of demi-sphere
+Radius = 0.5  # Radius of demi-sphere
 L = 2  # Domain size
 S = L**2  # Domain area
 
 # Material parameters
 E = 1e3  # Young's modulus
-nu = 0.3  # Poisson's ratio
+nu = 0.  # Poisson's ratio
 E_star = E / (1 - nu**2)  # Plane strain modulus
 
 # Generate a 2D coordinate space
-n = 300
-m = 300
+n = 1000
+m = 1000
 x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))
 
 x0 = 1
@@ -65,7 +65,7 @@ delta = 0
 
 # Initialize variables for the iteration
 tol = 1e-6  # Tolerance for convergence
-iter_max = 1000  # Maximum number of iteratio, 0, Pns
+iter_max = 81 # Maximum number of iteratio, 0, Pns
 k = 0  # Iteration counter
 error = np.inf  # Initialize error
 
@@ -103,6 +103,7 @@ while np.abs(error) > tol and k < iter_max:
 
     # Calculate the search direction
     T[S] = G[S] + delta * G_norm / G_old * T[S]
+    T[~S] = 0  ## out of contact area, dont need to update
     ## size dont match
 
     # Update G_old
@@ -110,40 +111,38 @@ while np.abs(error) > tol and k < iter_max:
 
     # Set R
     R, T_fourier  = apply_integration_operator(T, kernel_fourier, h_profile)
-
+    R += h_profile
     R -= R[S].mean()
 
     # Calculate the step size tau
     #######
-    ###Question is this a vector multiplication or element-wise multiplication?
-    #######
-    tau = np.dot(G[S], T[S]) / np.dot(R[S], T[S])
+    tau = np.vdot(G[S], T[S]) / np.vdot(R[S], T[S])
 
     # Update P
     P -= tau * T        
-    P[P < 0] = 0
+    P *= P > 0
 
     # identify the inadmissible points
     R = (P == 0) & (G < 0)
 
-    if np.all(R==0):
+    if R.sum() == 0:
         delta = 1
     else:
-        delta = 0
+        delta = 0#change the contact point set and need to do conjugate gradient again
 
     # Apply positive pressure on inadmissible points       
-    P[R] -= tau * G[R]
+    #P[R] -= tau * G[R]
 
 
     # Enforce the applied force constraint
-    P = W * P / np.mean(P) ## be wise here#############
+    P = W * P / np.mean(P) / L**2  ## be wise here#############
     ##############################
 
 
 
     # Calculate the error for convergence checking
-    error = np.vdot(P, (G - np.min(G))) / (h_profile.size*h_rms*W) #/ np.linalg.norm(h_matrix)
-    print(error, k, np.mean(P))
+    error = np.vdot(P, (G - np.min(G))) / (P.sum()*h_rms) 
+    print(delta, error, k, np.mean(P), np.mean(P>0), tau)
     
     k += 1  # Increment the iteration counter
 
@@ -167,7 +166,6 @@ numerical_max_pressure = np.max(P)
 
 
 
-
 print("Numerical contact area:", numerical_contact_area)
 
 print("Numerical maximum pressure:", numerical_max_pressure)
@@ -179,6 +177,12 @@ print("Numerical maximum pressure:", numerical_max_pressure)
 #Here we define p0 as the reference pressure
 p0 = (6*W*E_star**2/(np.pi**3*Radius**2))**(1/3)
 a = (3*W*Radius/(4*E_star))**(1/3)
+
+plt.plot(x[n//2], P[n//2])
+plt.plot(x[n//2], p0*np.sqrt(1 - (x[n//2]-x0)**2 / a**2))
+plt.show()
+
+
 
 print("Analytical contact area radius:", a)
 print("Analytical maximum pressure:", p0)

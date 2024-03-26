@@ -163,10 +163,12 @@ Surface = np.loadtxt("surface.dat")
 U = np.zeros((n, m))
 M = np.zeros((n, m))
 
+Ac=[]
+
 for t in range(t0, t1, dt):
     #main step0: Update the effective modulus
     #effictive modulus
-    G_t = G_inf + G_1 * np.exp(-t/tau_0)
+    #G_t = G_inf + G_1 * np.exp(-t/tau_0)
 
     #E_star = G_t
     E_star = 1.0#clarify to be constant on both sides to update the surface profile
@@ -175,11 +177,13 @@ for t in range(t0, t1, dt):
     H_new = alpha*Surface + beta*U + gamma*M
 
     #main step2: Update the displacement field
-    U, P = contact_solver(n, m, W, S, G_t, H_new, tol=1e-6, iter_max=10000)
-    ###????? how to update the loading field W_new
+    U, P = contact_solver(n, m, W, S, E_star, H_new, tol=1e-6, iter_max=10000)
+    ###const no need to update the loading field W_new
 
 
-    A_c = np.mean(P > 0)
+    Ac.append(np.mean(P > 0)*S)
+
+
 
     #main step3: Update the partial displacement field
     M = (G_0*dt/((G_0+G_1)*dt+eta_1))*(eta_1*M /G_0/dt + (G_1+eta_1/dt)*U -eta_1*U/dt)

@@ -63,7 +63,7 @@ gen = np.random.default_rng()
 white_noise = gen.normal(size=phi_values.shape)
 fft_noise = np.fft.fft2(white_noise)
 filtered_noise = fft_noise * np.sqrt(phi_values) #* np.exp(1j * theta)
-surface = np.fft.ifft2(filtered_noise).real*np.sqrt(n*m)# add this np.sqrt(n*m) to implement the filtering algorithm
+surface = np.fft.ifft2(filtered_noise).real*np.sqrt(n*m)/(n*m)# add this np.sqrt(n*m) to implement the filtering algorithm
 
 # Plotting
 plt.figure(figsize=(10, 8))

@@ -161,7 +161,7 @@ Eigen::MatrixXd generateRandomSurface(const Eigen::MatrixXd& phiValues, int n, i
     //fftw_free(fftInput);
     fftw_free(fftOutput);
 
-    return surface*std::sqrt(n*m);
+    return surface*std::sqrt(n*m)/(n*m);
 }
 
 void SaveSurfaceToFile(const Eigen::MatrixXd& surface, const std::string& filename){
