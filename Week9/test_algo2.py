@@ -1,3 +1,6 @@
+### Algorithm 2: Polonsky and Keer (1999b) Constrained Conjugate Gradient Algorithm.
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -53,7 +56,8 @@ T = np.zeros((n, m))
 #set the norm of surface(to normalze the error)
 h_rms = np.std(h_profile)
 
-#initialize G and G_old
+#initialize G_norm and G_old
+G_norm = 0
 G_old = 1
 
 #initialize delta
@@ -69,16 +73,13 @@ def apply_integration_operator(Origin, kernel_fourier, h_profile):
     # Compute the Fourier transform of the input image
     Origin2fourier = np.fft.fft2(Origin, norm='ortho')
 
-    # Apply the filter in the Fourier domain
-    Gradient_fourier = Origin2fourier * kernel_fourier
+    Middle_fourier = Origin2fourier * kernel_fourier
 
-    # Compute the inverse Fourier transform to get the filtered image
-    Gradient = np.fft.ifft2(Gradient_fourier, norm='ortho').real
+    Middle = np.fft.ifft2(Middle_fourier, norm='ortho').real
 
-    # Subtract h_profile from the filtered image
-    result = Gradient - h_profile
+    Gradient = Middle - h_profile
 
-    return result, Origin2fourier#true gradient
+    return Gradient, Origin2fourier#true gradient
 
 
 
@@ -110,7 +111,7 @@ while np.abs(error) > tol and k < iter_max:
     # Set R
     R, T_fourier  = apply_integration_operator(T, kernel_fourier, h_profile)
 
-    R = R - R[S].mean()
+    R -= R[S].mean()
 
     # Calculate the step size tau
     #######
@@ -135,8 +136,8 @@ while np.abs(error) > tol and k < iter_max:
 
 
     # Enforce the applied force constraint
-    P = W * P / np.mean(P)## be wise here#############"
-    ##############################"
+    P = W * P / np.mean(P) ## be wise here#############
+    ##############################
 
 
 
