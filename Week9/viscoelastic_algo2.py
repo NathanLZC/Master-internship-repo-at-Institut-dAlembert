@@ -8,16 +8,16 @@ import matplotlib.pyplot as plt
 G_0 = 2.75  # MPa
 G_1 = 2.75  # MPa
 G_inf = 1/(1/G_0 + 1/G_1)  # MPa
-tau_0 = 0.01  # s
+tau_0 = 0.5  # s
 eta_1 = G_1 * tau_0  # Characteristic time
 
 #define input parameters
 ##time
 t0 = 0
 t1 = 1
-dt = (t1 - t0)/1000
+dt = (t1 - t0)/50
 ##load(constant)
-W = 1e2  # Total load
+W = 1e0  # Total load
 
 #domain size
 R = 1  # Radius of demi-sphere
@@ -41,7 +41,7 @@ y0 = 1
 # We define the distance from the center of the sphere
 r = np.sqrt((x-x0)**2 + (y-y0)**2)
 
-E_star = 1.0
+E_star = 4/3
 
 # Define the kernel in the Fourier domain
 q_x = 2 * np.pi * np.fft.fftfreq(n, d=L/n)
@@ -177,7 +177,7 @@ alpha = G_inf + (G_1 + eta_1/dt)/(1 + G_1/G_0 + eta_1/G_0/dt)
 beta = (eta_1/dt)/(1+G_1/G_0+eta_1/G_0/dt)
 gamma = (eta_1/G_0/dt)/(1+G_1/G_0+eta_1/G_0/dt)
 
-Surface = np.loadtxt("surface.dat")
+Surface = h_profile
 
 U = np.zeros((n, m))
 M = np.zeros((n, m))
@@ -190,13 +190,13 @@ for t in np.arange(t0, t1, dt):
     #G_t = G_inf + G_1 * np.exp(-t/tau_0)
 
     #E_star = G_t
-    E_star = 1.0#clarify to be constant on both sides to update the surface profile
+    
 
     #main step1: Update the surface profile
-    H_new = alpha*Surface + beta*U + gamma*M
+    H_new = alpha*Surface - beta*U + gamma*M
 
     #main step2: Update the displacement field
-    U, P = contact_solver(n, m, W, S, E_star, H_new, tol=1e-6, iter_max=10000)
+    U, P = contact_solver(n, m, W, S, E_star, H_new, tol=1e-6, iter_max=200)
     ###const no need to update the loading field W_new
 
 
@@ -220,8 +220,8 @@ for t in np.arange(t0, t1, dt):
 #########################
     
 #Here we define p0 as the reference pressure
-p0 = (6*W*(G_inf+G_1)**2/(np.pi**3*Radius**2))**(1/3)
-a = (3*W*Radius/(4*(G_inf+G_1)))**(1/3)
+p0 = (6*W*(G_0)**2/(np.pi**3*Radius**2))**(1/3)
+a = (3*W*Radius/(4*(G_0)))**(1/3)
 
 plt.plot(x[n//2], P[n//2])
 plt.plot(x[n//2], p0*np.sqrt(1 - (x[n//2]-x0)**2 / a**2))
@@ -234,6 +234,8 @@ print("Analytical maximum pressure:", p0)
 print("Numerical contact area:", Ac[-1])
 print("Analyical contact area:", Ac_hertz)
 
+print(Ac)
 plt.plot(np.arange(t0, t1, dt), Ac)
+#plt.axhline(Ac_hertz)
 plt.show()
 
