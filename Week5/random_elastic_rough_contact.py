@@ -64,7 +64,7 @@ white_noise = gen.normal(size=phi_values.shape)
 fft_noise = np.fft.fft2(white_noise)#here we don't normalize the white noise, so we need to normalize the surface
 filtered_noise = fft_noise * np.sqrt(phi_values) #* np.exp(1j * theta)
 surface = np.fft.ifft2(filtered_noise).real*np.sqrt(n*m)/(n*m)# add this np.sqrt(n*m) to implement the filtering algorithm
-
+#normalize the surface or white noise
 
 # Plotting
 plt.figure(figsize=(10, 8))
