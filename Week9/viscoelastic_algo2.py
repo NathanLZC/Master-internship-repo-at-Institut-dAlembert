@@ -25,6 +25,9 @@ L = 2  # Domain size
 Radius = 0.5
 S = L**2  # Domain area
 
+E = 1.0  # Young's modulus
+nu = 0.5
+
 # Generate a 2D coordinate space
 n = 300
 m = 300
@@ -41,7 +44,7 @@ y0 = 1
 # We define the distance from the center of the sphere
 r = np.sqrt((x-x0)**2 + (y-y0)**2)
 
-E_star = 4/3
+E_star = E / (1 - nu**2)  # Plane strain modulus
 
 # Define the kernel in the Fourier domain
 q_x = 2 * np.pi * np.fft.fftfreq(n, d=L/n)
@@ -196,7 +199,7 @@ for t in np.arange(t0, t1, dt):
     H_new = alpha*Surface - beta*U + gamma*M
 
     #main step2: Update the displacement field
-    U, P = contact_solver(n, m, W, S, E_star, H_new, tol=1e-6, iter_max=200)
+    U_new, P = contact_solver(n, m, W, S, E_star, H_new, tol=1e-6, iter_max=200)
     ###const no need to update the loading field W_new
 
 
@@ -205,8 +208,13 @@ for t in np.arange(t0, t1, dt):
 
 
     #main step3: Update the partial displacement field
-    M = (G_0*dt/((G_0+G_1)*dt+eta_1))*(eta_1*M /G_0/dt + (G_1+eta_1/dt)*U -eta_1*U/dt)
+    M = (G_0*dt/((G_0+G_1)*dt+eta_1))*(eta_1*M /G_0/dt + (G_1+eta_1/dt)*U_new -eta_1*U/dt)
 
+    #main step4: Update the total displacement field
+    U = U_new
+    #######################################
+    #check and need to correct backward_euler.py
+    #######################################
 
 #######################################
 ###Hertzian contact theory reference
@@ -220,8 +228,11 @@ for t in np.arange(t0, t1, dt):
 #########################
     
 #Here we define p0 as the reference pressure
-p0 = (6*W*(G_0)**2/(np.pi**3*Radius**2))**(1/3)
-a = (3*W*Radius/(4*(G_0)))**(1/3)
+    
+E_effective = 2*G_0*(1+nu)
+
+p0 = (6*W*(E_effective)**2/(np.pi**3*Radius**2))**(1/3)
+a = (3*W*Radius/(4*(E_effective)))**(1/3)
 
 plt.plot(x[n//2], P[n//2])
 plt.plot(x[n//2], p0*np.sqrt(1 - (x[n//2]-x0)**2 / a**2))
