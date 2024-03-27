@@ -13,7 +13,7 @@ S = L**2  # Domain area
 
 # Material parameters
 E = 1e3  # Young's modulus
-nu = 0.  # Poisson's ratio
+nu = 0.3  # Poisson's ratio
 E_star = E / (1 - nu**2)  # Plane strain modulus
 
 # Generate a 2D coordinate space
