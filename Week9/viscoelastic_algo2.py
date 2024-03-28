@@ -228,25 +228,51 @@ for t in np.arange(t0, t1, dt):
 #########################
     
 #Here we define p0 as the reference pressure
-    
-E_effective = 2*G_0*(1+nu)
+##Hertz solution at t0    
+E_effective_t0 = 2*G_inf*(1+nu)
 
-p0 = (6*W*(E_effective)**2/(np.pi**3*Radius**2))**(1/3)
-a = (3*W*Radius/(4*(E_effective)))**(1/3)
+p0_t0 = (6*W*(E_effective_t0)**2/(np.pi**3*Radius**2))**(1/3)
+a_t0 = (3*W*Radius/(4*(E_effective_t0)))**(1/3)
+
+##Hertz solution at t_inf
+##Hertz solution at t_inf follows the Prony series in https://en.wikipedia.org/wiki/Viscoelasticity#cite_note-VanVliet-5
+##We can use the Prony series to calculate the effective modulus at t_inf
+##the following is from Marques, Severino P. C., and Guillermo J. Creus. Computational Viscoelasticity. 
+##Then, reference is made to a rheological model (generalized Maxwell) and Prony series are introduced as its representation.
+##To clarify the different notations, 
+E_effective_inf = 2*G_1*(1+nu)
+
+p0_t_inf = (6*W*(E_effective_inf)**2/(np.pi**3*Radius**2))**(1/3)
+a_t_inf = (3*W*Radius/(4*(E_effective_inf)))**(1/3)
+
 
 plt.plot(x[n//2], P[n//2])
-plt.plot(x[n//2], p0*np.sqrt(1 - (x[n//2]-x0)**2 / a**2))
+plt.plot(x[n//2], p0_t0*np.sqrt(1 - (x[n//2]-x0)**2 / a_t0**2))
+plt.plot(x[n//2], p0_t_inf*np.sqrt(1 - (x[n//2]-x0)**2 / a_t_inf**2))
+plt.xlabel("x")
+plt.ylabel("Pressure distribution")
 plt.show()
 
-Ac_hertz = np.pi*a**2
+Ac_hertz_t0 = np.pi*a_t0**2
+Ac_hertz_t_inf = np.pi*a_t_inf**2
 
-print("Analytical contact area radius:", a)
-print("Analytical maximum pressure:", p0)
-print("Numerical contact area:", Ac[-1])
-print("Analyical contact area:", Ac_hertz)
+print("Analytical contact area radius at t0:", a_t0)
+print("Analytical contact area radius at t_inf:", a_t_inf)
+print("Analytical maximum pressure at t0:", p0_t0)
+print("Analytical maximum pressure at t_inf:", p0_t_inf)
+print("Numerical contact area at t0:", Ac[0])
+print("Numerical contact area at t_inf",  Ac[-1])
+print("Analyical contact area at t0:", Ac_hertz_t0)
+print("Analyical contact area at t_inf:", Ac_hertz_t_inf)
+
 
 print(Ac)
+
+
+
 plt.plot(np.arange(t0, t1, dt), Ac)
+plt.axhline(Ac_hertz_t0)
+plt.axhline(Ac_hertz_t_inf)
 #plt.axhline(Ac_hertz)
 plt.show()
 
