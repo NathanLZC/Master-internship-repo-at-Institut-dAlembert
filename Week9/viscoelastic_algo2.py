@@ -247,10 +247,12 @@ a_t_inf = (3*W*Radius/(4*(E_effective_inf)))**(1/3)
 
 
 plt.plot(x[n//2], P[n//2])
+#add a legend for hertz solution at t0 and t_inf
 plt.plot(x[n//2], p0_t0*np.sqrt(1 - (x[n//2]-x0)**2 / a_t0**2))
 plt.plot(x[n//2], p0_t_inf*np.sqrt(1 - (x[n//2]-x0)**2 / a_t_inf**2))
 plt.xlabel("x")
 plt.ylabel("Pressure distribution")
+plt.legend(["Numerical solution", "Hertz solution at t0", "Hertz solution at t_inf"])
 plt.show()
 
 Ac_hertz_t0 = np.pi*a_t0**2
@@ -271,8 +273,13 @@ print(Ac)
 
 
 plt.plot(np.arange(t0, t1, dt), Ac)
-plt.axhline(Ac_hertz_t0, color='red')
-plt.axhline(Ac_hertz_t_inf, color='blue')
+plt.axhline(Ac_hertz_t0, color='red', linestyle='dotted')
+#plot Hertz solution at t_inf with dotted line
+plt.axhline(Ac_hertz_t_inf, color='blue', linestyle='dotted')
+#plt.axhline(Ac_hertz_t_inf, color='blue')
 #plt.axhline(Ac_hertz)
+plt.xlabel("Time")
+plt.ylabel("Contact area")
+plt.legend(["Numerical", "Hertz at t=0", "Hertz at t=inf"])
 plt.show()
 
