@@ -172,9 +172,9 @@ def contact_solver(n, m, W, S, E_star, h_profile, tol=1e-6, iter_max=200):
 
 
 #######################################
-###if we let k=1, we can compare the real contact area with hertz solution at t=0 and t>>\tau_0
+###if we let k_branch=1, we can compare the real contact area with hertz solution at t=0 and t>>\tau_0
 #######################################
-k = 1
+k_branch = 1
 
 alpha = G_inf + (G_1 + eta_1/dt)/(1 + G_1/G_0 + eta_1/G_0/dt)
 beta = (eta_1/dt)/(1+G_1/G_0+eta_1/G_0/dt)
