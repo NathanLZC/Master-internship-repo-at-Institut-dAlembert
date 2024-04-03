@@ -11,7 +11,7 @@ G_1 = 2.75  # MPa
 G_inf = 1/(1/G_0 + 1/G_1)  # MPa
 
 tau_0 = 0.5  # s
-eta_1 = G_1 * tau_0  # Characteristic time
+eta_1 = 0#G_1 * tau_0  # Characteristic time
 
 #define input parameters
 ##time
@@ -245,7 +245,7 @@ for t in np.arange(t0, t1, dt):
     
 #Here we define p0 as the reference pressure
 ##Hertz solution at t0    
-E_effective_t0 = 2*G_inf*(1+nu)
+E_effective_t0 = 2*G_0*(1+nu)
 
 p0_t0 = (6*W*(E_effective_t0)**2/(np.pi**3*Radius**2))**(1/3)
 a_t0 = (3*W*Radius/(4*(E_effective_t0)))**(1/3)
@@ -256,7 +256,7 @@ a_t0 = (3*W*Radius/(4*(E_effective_t0)))**(1/3)
 ##the following is from Marques, Severino P. C., and Guillermo J. Creus. Computational Viscoelasticity. 
 ##Then, reference is made to a rheological model (generalized Maxwell) and Prony series are introduced as its representation.
 ##To clarify the different notations, 
-E_effective_inf = 2*G_1*(1+nu)
+E_effective_inf = 2*G_inf*(1+nu)
 
 
 p0_t_inf = (6*W*(E_effective_inf)**2/(np.pi**3*Radius**2))**(1/3)

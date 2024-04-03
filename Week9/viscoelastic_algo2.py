@@ -25,7 +25,7 @@ L = 2  # Domain size
 Radius = 0.5
 S = L**2  # Domain area
 
-E = 1.0  # Young's modulus
+E = 3  # Young's modulus
 nu = 0.5
 
 # Generate a 2D coordinate space
@@ -229,7 +229,7 @@ for t in np.arange(t0, t1, dt):
     
 #Here we define p0 as the reference pressure
 ##Hertz solution at t0    
-E_effective_t0 = 2*G_inf*(1+nu)
+E_effective_t0 = 2*G_0*(1+nu)/(1-nu**2)
 
 p0_t0 = (6*W*(E_effective_t0)**2/(np.pi**3*Radius**2))**(1/3)
 a_t0 = (3*W*Radius/(4*(E_effective_t0)))**(1/3)
@@ -240,7 +240,7 @@ a_t0 = (3*W*Radius/(4*(E_effective_t0)))**(1/3)
 ##the following is from Marques, Severino P. C., and Guillermo J. Creus. Computational Viscoelasticity. 
 ##Then, reference is made to a rheological model (generalized Maxwell) and Prony series are introduced as its representation.
 ##To clarify the different notations, 
-E_effective_inf = 2*G_1*(1+nu)
+E_effective_inf = 2*G_inf*(1+nu)/(1-nu**2)
 
 p0_t_inf = (6*W*(E_effective_inf)**2/(np.pi**3*Radius**2))**(1/3)
 a_t_inf = (3*W*Radius/(4*(E_effective_inf)))**(1/3)
@@ -271,8 +271,8 @@ print(Ac)
 
 
 plt.plot(np.arange(t0, t1, dt), Ac)
-plt.axhline(Ac_hertz_t0)
-plt.axhline(Ac_hertz_t_inf)
+plt.axhline(Ac_hertz_t0, color='red')
+plt.axhline(Ac_hertz_t_inf, color='blue')
 #plt.axhline(Ac_hertz)
 plt.show()
 
