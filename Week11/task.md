@@ -3,3 +3,5 @@
 [2] Generalized Maxwell model
 
 [3] Fix debugging_viscoelastic.ipynb, add an pure-elastic branch for generalized Zener model
+
+[4] $\Delta$ and $\delta$
