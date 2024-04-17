@@ -149,7 +149,7 @@ G_1 = 2.75
 print('G_inf:', G_inf, ' G_1:', G_1)
 
 # Define the relaxation times
-tau_1 = .1
+tau_1 = 0.1
 eta_1 = G_1 * tau_1
 
 ##################################################################
@@ -182,19 +182,23 @@ for t in np.arange(t0, t1, dt):
 
     #main step1: Compute $P_{t+\Delta t}^{\prime}$
     #M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
-    
+    M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
+
+    ##Sanity check??
 
 
 
+    ##main step2: Update global displacement
+    U_new = (1/alpha)*(M_new - gamma_k*M + beta*U)
 
 
 
+    #main step3: Update the pressure
+    #M_new[k] = gamma_k*(M_new[k] + G[k]*(U_new[k] - U[k]))
+    M_new = gamma_k*(M_new + G_1*(U_new - U))
 
-    #main step2: Update the l
 
     Ac.append(np.mean(P > 0)*S)
-
-    U_new = (1/alpha2)*(M_new - gamma*M + beta*U)
 
     M = M_new
     #main step4: Update the total displacement field
@@ -207,12 +211,12 @@ for t in np.arange(t0, t1, dt):
 ###Hertzian contact theory reference
 #######################################
 ##Hertz solution at t0    
-E_effective_t0 = 2*G_inf*(1+nu)/(1-nu**2)
+E_effective_t0 = 2*(G_inf+G_1)*(1+nu)/(1-nu**2)
 
 p0_t0 = (6*W*(E_effective_t0)**2/(np.pi**3*Radius**2))**(1/3)
 a_t0 = (3*W*Radius/(4*(E_effective_t0)))**(1/3)
 ##Hertz solution at t_inf
-E_effective_inf = 2*(G_inf+G_1)*(1+nu)/(1-nu**2)
+E_effective_inf = 2*G_inf*(1+nu)/(1-nu**2)
 
 p0_t_inf = (6*W*(E_effective_inf)**2/(np.pi**3*Radius**2))**(1/3)
 a_t_inf = (3*W*Radius/(4*(E_effective_inf)))**(1/3)
@@ -244,6 +248,6 @@ plt.xlabel("Time(s)")
 plt.ylabel("Contact area($m^2$)")
 plt.legend(["Numerical", "Hertz at t=0", "Hertz at t=inf"])
 #define a title that can read parameter tau_0
-plt.title("Contact area vs time for a single branch viscoelastic model with tau_0 = " + str(tau_0) + "s")
+plt.title("Contact area vs time for a single branch viscoelastic model with tau_0 = " + str(tau_1) + "s")
 #plt.axhline(Ac_hertz_t_inf, color='blue')
 plt.show()
