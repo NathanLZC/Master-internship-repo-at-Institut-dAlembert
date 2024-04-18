@@ -218,7 +218,7 @@ for t in np.arange(t0, t1, dt):
 
     #main step3: Update the pressure
     #M_new[k] = gamma_k*(M_new[k] + G[k]*(U_new[k] - U[k]))
-    M_new = gamma_k*(M_new + G_1*(U_new - U))
+    M_new = gamma_k*(M + G_1*(U_new - U))
 
 
     Ac.append(np.mean(P > 0)*S)

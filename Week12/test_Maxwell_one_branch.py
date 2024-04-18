@@ -60,32 +60,7 @@ def apply_integration_operator(Origin, kernel_fourier, h_profile):
 
     return Gradient, Origin2fourier#true gradient
 
-
-
-
-
-def recover_original_image(Gradient, kernel_fourier, h_profile):
-    Middle = Gradient + h_profile
-    
-    Middle_fourier = np.fft.fft2(Middle, norm='ortho')
-    
-    Origin2fourier = Middle_fourier / kernel_fourier
-
-    P = np.fft.ifft2(Origin2fourier, norm='ortho').real  
-
-    return P
-
-
-
-
-
-
-
-
-
 ##define our elastic solver with constrained conjuagte gradient method
-
-## E_star seems no use here
 def contact_solver(n, m, W, S, h_profile, tol=1e-6, iter_max=200):
     
 
@@ -172,7 +147,7 @@ G_1 = 2.75
 print('G_inf:', G_inf, ' G_1:', G_1)
 
 # Define the relaxation times
-tau_1 = 1e6
+tau_1 = 0.1
 eta_1 = G_1 * tau_1
 
 ##################################################################
@@ -218,7 +193,7 @@ for t in np.arange(t0, t1, dt):
 
     #main step3: Update the pressure
     #M_new[k] = gamma_k*(M_new[k] + G[k]*(U_new[k] - U[k]))
-    M_new = gamma_k*(M_new + G_1*(U_new - U))
+    M_new = gamma_k*(M + G_1*(U_new - U))
 
 
     Ac.append(np.mean(P > 0)*S)
@@ -250,7 +225,7 @@ plt.plot(x[n//2], p0_t0*np.sqrt(1 - (x[n//2]-x0)**2 / a_t0**2))
 plt.plot(x[n//2], p0_t_inf*np.sqrt(1 - (x[n//2]-x0)**2 / a_t_inf**2))
 plt.legend(["Numerical", "Hertz at t=0", "Hertz at t=inf"])
 plt.xlabel("x")
-plt.ylabel("Pressure distribution")
+plt.ylabel("Pressure distribution for one-branch Generalized Maxwell model")
 plt.show()
 
 Ac_hertz_t0 = np.pi*a_t0**2
@@ -271,6 +246,6 @@ plt.xlabel("Time(s)")
 plt.ylabel("Contact area($m^2$)")
 plt.legend(["Numerical", "Hertz at t=0", "Hertz at t=inf"])
 #define a title that can read parameter tau_0
-plt.title("Contact area vs time for a single branch viscoelastic model with tau_0 = " + str(tau_1) + "s")
+plt.title("Contact area vs time for one-branch Generalized Maxwell model with tau_0 = " + str(tau_1) + "s")
 #plt.axhline(Ac_hertz_t_inf, color='blue')
 plt.show()
