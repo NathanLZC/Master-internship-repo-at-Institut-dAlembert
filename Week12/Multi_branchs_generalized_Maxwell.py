@@ -155,27 +155,18 @@ print('tau:', tau, ' eta:', eta)
 ##################################################################
 #####define G_tilde for one-branch Maxwell model #################
 ##################################################################
-
-
-
-
-G_tilde = tau_1 * G_1 / (tau_1 + dt)
-
-
-
-
-
-#for multi-branch, we have $\tilde{G}=\sum_k \frac{\tau^k}{\tau^k+\Delta t} G^k$
-#G_tilde = 0
-#for k in range(n):
-#    G_tilde += tau[k] / (tau[k] + dt) * G[k]
+G_tilde = []
+for k in range(len(G)):
+    G_tilde[k] += tau[k] / (tau[k] + dt) * G[k]
 
 
 # Define parameters for updating the surface profile
 alpha = G_inf + G_tilde
 beta = G_tilde
-gamma_k = tau_1 / (tau_1 + dt)#k=1 for one-branch model
-#gamma_k = tau[k]/(tau[k] + dt)
+
+gamma = []
+for k in range(len(G)):
+    gamma[k] = tau[k]/(tau[k] + dt)
 
 Surface = h_profile
 
@@ -186,7 +177,7 @@ Ac=[]
 
 for t in np.arange(t0, t1, dt):
     #Update the surface profile
-    H_new = alpha*Surface - beta*U + gamma_k*M
+    H_new = alpha*Surface - beta*U + gamma[k]*M
 
     #main step1: Compute $P_{t+\Delta t}^{\prime}$
     #M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
