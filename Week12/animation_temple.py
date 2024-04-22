@@ -206,25 +206,25 @@ a_t_inf = (3*W*Radius/(4*(E_effective_inf)))**(1/3)
 
 
 
-# 定义动画更新函数
+# define the update function for the animation
 def update(frame):
     ax.clear()
     ax.set_xlim(0, L)
     ax.set_ylim(0, 1.1*p0_t0)
     ax.grid()
 
-    # 绘制赫兹解作为参考
+    # draw Hertzian contact theory reference
     ax.plot(x[n//2], p0_t0*np.sqrt(1 - (x[n//2]-x0)**2 / a_t0**2), 'g--', label='Hertz at t=0')
     ax.plot(x[n//2], p0_t_inf*np.sqrt(1 - (x[n//2]-x0)**2 / a_t_inf**2), 'b--', label='Hertz at t=inf')
 
-    # 绘制当前时间步的数值结果
+    # draw numerical solution at current time step
     ax.plot(x[n//2], pressure_distributions[frame], 'r-', label='Numerical')
     ax.set_title(f"Time = {t0 + frame * dt:.2f}s")
     plt.xlabel("x")
     plt.ylabel("Pressure distribution")
     plt.legend()
 
-# 收集所有时间步的数据
+# collect pressure distributions at each time step
 pressure_distributions = []
 for t in np.arange(t0, t1, dt):
     H_new = alpha * Surface - beta * U + gamma_k * M
@@ -232,12 +232,12 @@ for t in np.arange(t0, t1, dt):
     U_new = (1/alpha)*(M_new - gamma_k * M + beta * U)
     M = gamma_k * (M + G_1 * (U_new - U))
     U = U_new
-    pressure_distributions.append(P[n//2].copy())  # 存储每个时间步的压力分布
+    pressure_distributions.append(P[n//2].copy())  # store the pressure distribution at each time step
 
-# 创建图形和轴
+# create a figure and axis
 fig, ax = plt.subplots()
 
-# 创建动画
+# create an animation
 ani = FuncAnimation(fig, update, frames=len(pressure_distributions), repeat=False)
 
 plt.show()
@@ -252,11 +252,11 @@ print("Analytical contact area radius at t0:", a_t0)
 print("Analytical contact area radius at t_inf:", a_t_inf)
 print("Analytical maximum pressure at t0:", p0_t0)
 print("Analytical maximum pressure at t_inf:", p0_t_inf)
-print("Numerical contact area at t0:", Ac[0])
-print("Numerical contact area at t_inf",  Ac[-1])
+#print("Numerical contact area at t0:", Ac[0])
+#print("Numerical contact area at t_inf",  Ac[-1])
 print("Analyical contact area at t0:", Ac_hertz_t0)
 print("Analyical contact area at t_inf:", Ac_hertz_t_inf)
-plt.plot(np.arange(t0, t1, dt), Ac)
+#plt.plot(np.arange(t0, t1, dt), Ac)
 plt.axhline(Ac_hertz_t0, color='red', linestyle='dotted')
 plt.axhline(Ac_hertz_t_inf, color='blue', linestyle='dotted')
 plt.xlabel("Time(s)")

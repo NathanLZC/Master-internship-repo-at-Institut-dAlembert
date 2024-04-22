@@ -201,63 +201,75 @@ p0_t_inf = (6*W*(E_effective_inf)**2/(np.pi**3*Radius**2))**(1/3)
 a_t_inf = (3*W*Radius/(4*(E_effective_inf)))**(1/3)
 
 
-
-fig, ax = plt.subplots()
-plt.ion()
-plt.show()
-
-time = 0
-start_time = np.zeros(time_steps)
-
-for t in np.arange(t0, t1, dt):
-
+# define the update function for the animation
+def update(frame):
     ax.clear()
     ax.set_xlim(0, L)
+    ax.set_ylim(0, 1.1*p0_t0)
     ax.grid()
-    time += dt
 
-    plt.xlabel("x")
-    plt.ylabel("Pressure distribution")
-    plt.title("Pressure distribution for one-branch Generalized Maxwell model")
-    
+    # draw Hertzian contact theory reference
     ax.plot(x[n//2], p0_t0*np.sqrt(1 - (x[n//2]-x0)**2 / a_t0**2), 'g--', label='Hertz at t=0')
     ax.plot(x[n//2], p0_t_inf*np.sqrt(1 - (x[n//2]-x0)**2 / a_t_inf**2), 'b--', label='Hertz at t=inf')
 
-    for t in np.arange(t0, t1, dt):
-
-        #Update the surface profile
-        H_new = alpha*Surface - beta*U + gamma_k*M
-
-        #main step1: Compute $P_{t+\Delta t}^{\prime}$
-        #M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
-        M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
-
-        ##Sanity check??
-        
-
-
-        ##main step2: Update global displacement
-        U_new = (1/alpha)*(M_new - gamma_k*M + beta*U)
-
-
-
-        #main step3: Update the pressure
-        #M_new[k] = gamma_k*(M_new[k] + G[k]*(U_new[k] - U[k]))
-        M_new = gamma_k*(M + G_1*(U_new - U))
-
-
-        Ac.append(np.mean(P > 0)*S)
-
-        M = M_new
-        #main step4: Update the total displacement field
-        U = U_new
-
-    ax.set_ylim(0, 1.1*np.max(P))
-    ax.plot(x[n//2], P[n//2], 'r-', label='Numerical')
+    # draw numerical solution at current time step
+    ax.plot(x[n//2], pressure_distributions[frame], 'r-', label='Numerical')
+    ax.set_title(f"Time = {t0 + frame * dt:.2f}s")
+    plt.xlabel("x")
+    plt.ylabel("Pressure distribution")
     plt.legend()
-    fig.canvas.draw()
-    fig.canvas.flush_events()
 
+
+# collect pressure distributions at each time step
+pressure_distributions = []
+
+for t in np.arange(t0, t1, dt):
+
+    #Update the surface profile
+    H_new = alpha*Surface - beta*U + gamma_k*M
+
+    #main step1: Compute $P_{t+\Delta t}^{\prime}$
+    #M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
+    M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
+
+    ##Sanity check??
+    
+
+
+    ##main step2: Update global displacement
+    U_new = (1/alpha)*(M_new - gamma_k*M + beta*U)
+
+
+
+    #main step3: Update the pressure
+    #M_new[k] = gamma_k*(M_new[k] + G[k]*(U_new[k] - U[k]))
+    M_new = gamma_k*(M + G_1*(U_new - U))
+
+
+##Question here: seems that we need to update the pressure again, but parameters repeated
+#SEE animation_temple.py
+#pressure_distributions = []
+#for t in np.arange(t0, t1, dt):
+#   H_new = alpha * Surface - beta * U + gamma_k * M
+#    M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
+#    U_new = (1/alpha)*(M_new - gamma_k * M + beta * U)
+#    M = gamma_k * (M + G_1 * (U_new - U))
+#    U = U_new
+#    pressure_distributions.append(P[n//2].copy())  # store the pressure distribution at each time step
+#
+#
+    Ac.append(np.mean(P > 0)*S)
+
+    M = M_new
+    #main step4: Update the total displacement field
+    U = U_new
+    pressure_distributions.append(P[n//2].copy())  # store the pressure distribution at each time step
+
+# create a figure and axis
+fig, ax = plt.subplots()
+
+# create an animation
+ani = FuncAnimation(fig, update, frames=len(pressure_distributions), repeat=False)
 
 plt.show()
 
