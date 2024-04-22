@@ -3,6 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 #define input parameters
 ##time
 t0 = 0
@@ -148,6 +149,8 @@ print('G_inf:', G_inf, ' G: ' + str(G))
 
 # Define the relaxation times
 tau = [0.1, 0.5, 1, 2, 10]  # relaxation times
+#tau = [0, 0, 0, 0, 0]
+#tau = [1e6,1e6,1e6,1e6,1e6]
 eta = [g * t for g, t in zip(G, tau)]
 
 print('tau:', tau, ' eta:', eta)
@@ -155,9 +158,9 @@ print('tau:', tau, ' eta:', eta)
 ##################################################################
 #####define G_tilde for one-branch Maxwell model #################
 ##################################################################
-G_tilde = []
+G_tilde = 0
 for k in range(len(G)):
-    G_tilde[k] += tau[k] / (tau[k] + dt) * G[k]
+    G_tilde += tau[k] / (tau[k] + dt) * G[k]
 
 
 # Define parameters for updating the surface profile
@@ -166,7 +169,7 @@ beta = G_tilde
 
 gamma = []
 for k in range(len(G)):
-    gamma[k] = tau[k]/(tau[k] + dt)
+    gamma.append(tau[k]/(tau[k] + dt))
 
 Surface = h_profile
 
@@ -175,45 +178,6 @@ M = np.zeros((n, m))
 
 Ac=[]
 M_maxwell = 0
-
-for t in np.arange(t0, t1, dt):
-    #Update the surface profile
-    for k in range(len(G)):
-        M_maxwell += gamma[k]*M 
-    H_new = alpha*Surface - beta*U + M_maxwell
-
-    #main step1: Compute $P_{t+\Delta t}^{\prime}$
-    #M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
-    M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
-
-    ##Sanity check??
-    
-
-
-    ##main step2: Update global displacement
-    U_new = (1/alpha)*(M_new - M_maxwell + beta*U)
-
-
-
-
-
-    #main step3: Update the pressure
-    M_new[k] = gamma_k*(M_new[k] + G[k]*(U_new[k] - U[k]))
-    #M_new = gamma_k*(M + G_1*(U_new - U))
-
-
-
-
-
-
-    Ac.append(np.mean(P > 0)*S)
-
-    M = M_new
-    #main step4: Update the total displacement field
-    U = U_new
-
-
-
 
 #######################################
 ###Hertzian contact theory reference
@@ -234,13 +198,79 @@ p0_t_inf = (6*W*(E_effective_inf)**2/(np.pi**3*Radius**2))**(1/3)
 a_t_inf = (3*W*Radius/(4*(E_effective_inf)))**(1/3)
 
 
-plt.plot(x[n//2], P[n//2])
-plt.plot(x[n//2], p0_t0*np.sqrt(1 - (x[n//2]-x0)**2 / a_t0**2))
-plt.plot(x[n//2], p0_t_inf*np.sqrt(1 - (x[n//2]-x0)**2 / a_t_inf**2))
-plt.legend(["Numerical", "Hertz at t=0", "Hertz at t=inf"])
-plt.xlabel("x")
-plt.ylabel("Pressure distribution for multi-branch Generalized Maxwell model")
+# define the update function for the animation
+def update(frame):
+    ax.clear()
+    ax.set_xlim(0, L)
+    ax.set_ylim(0, 1.1*p0_t0)
+    ax.grid()
+
+    # draw Hertzian contact theory reference
+    ax.plot(x[n//2], p0_t0*np.sqrt(1 - (x[n//2]-x0)**2 / a_t0**2), 'g--', label='Hertz at t=0')
+    ax.plot(x[n//2], p0_t_inf*np.sqrt(1 - (x[n//2]-x0)**2 / a_t_inf**2), 'b--', label='Hertz at t=inf')
+
+    # draw numerical solution at current time step
+    ax.plot(x[n//2], pressure_distributions[frame], 'r-', label='Numerical')
+    ax.set_title(f"Time = {t0 + frame * dt:.2f}s")
+    plt.xlabel("x")
+    plt.ylabel("Pressure distribution")
+    plt.legend()
+
+
+# collect pressure distributions at each time step
+pressure_distributions = []
+for t in np.arange(t0, t1, dt):
+    #Update the surface profile
+    for k in range(len(G)):
+        M_maxwell += gamma[k]*M[k] 
+    H_new = alpha*Surface - beta*U + M_maxwell
+
+    #main step1: Compute $P_{t+\Delta t}^{\prime}$
+    #M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
+    M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
+
+    ##Sanity check??
+    
+
+
+    ##main step2: Update global displacement
+    U_new = (1/alpha)*(M_new - M_maxwell + beta*U)
+
+
+
+
+
+
+
+    #main step3: Update the pressure
+    for k in range(len(G)):
+        M_new[k] = gamma[k]*(M_new[k] + G[k]*(U_new[k] - U[k]))
+    #M_new = gamma_k*(M + G_1*(U_new - U))
+
+
+
+
+
+
+
+
+
+    Ac.append(np.mean(P > 0)*S)
+
+    M[k] = M_new[k]
+    #main step4: Update the total displacement field
+    U = U_new
+
+    pressure_distributions.append(P[n//2].copy())  # store the pressure distribution at each time step
+
+# create a figure and axis
+fig, ax = plt.subplots()
+
+# create an animation
+ani = FuncAnimation(fig, update, frames=len(pressure_distributions), repeat=False)
+
 plt.show()
+
 
 Ac_hertz_t0 = np.pi*a_t0**2
 Ac_hertz_t_inf = np.pi*a_t_inf**2
