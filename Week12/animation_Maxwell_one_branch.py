@@ -222,11 +222,11 @@ def update(frame):
 
 # collect pressure distributions at each time step
 pressure_distributions = []
-
+M_k_new = 0
 for t in np.arange(t0, t1, dt):
 
     #Update the surface profile
-    H_new = alpha*Surface - beta*U + gamma_k*M
+    H_new = alpha*Surface - beta*U + gamma_k*M_k_new
 
     #main step1: Compute $P_{t+\Delta t}^{\prime}$
     #M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
@@ -237,27 +237,15 @@ for t in np.arange(t0, t1, dt):
 
 
     ##main step2: Update global displacement
-    U_new = (1/alpha)*(M_new - gamma_k*M + beta*U)
+    U_new = (1/alpha)*(M_new - gamma_k*M_k_new + beta*U)
 
 
 
     #main step3: Update the pressure
     #M_new[k] = gamma_k*(M_new[k] + G[k]*(U_new[k] - U[k]))
-    M_new = gamma_k*(M + G_1*(U_new - U))
+    M_k_new = gamma_k*(M_k_new + G_1*(U_new - U))
 
 
-##Question here: seems that we need to update the pressure again, but parameters repeated
-#SEE animation_temple.py
-#pressure_distributions = []
-#for t in np.arange(t0, t1, dt):
-#   H_new = alpha * Surface - beta * U + gamma_k * M
-#    M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
-#    U_new = (1/alpha)*(M_new - gamma_k * M + beta * U)
-#    M = gamma_k * (M + G_1 * (U_new - U))
-#    U = U_new
-#    pressure_distributions.append(P[n//2].copy())  # store the pressure distribution at each time step
-#
-#
     Ac.append(np.mean(P > 0)*S)
 
     M = M_new

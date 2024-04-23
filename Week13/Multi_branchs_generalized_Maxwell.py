@@ -143,12 +143,14 @@ def contact_solver(n, m, W, S, h_profile, tol=1e-6, iter_max=200):
 #####shear modulus for one branch Maxwell model###################
 ##################################################################
 G_inf = 2.75 #elastic branch
-G = [2.75, 2, 0.25, 10, 2.5] #viscoelastic branch
+#G = [2.75, 2, 0.25, 10, 2.5] #viscoelastic branch
+G = [2.75, 2.75]
 
 print('G_inf:', G_inf, ' G: ' + str(G))
 
 # Define the relaxation times
-tau = [0.1, 0.5, 1, 2, 10]  # relaxation times
+#tau = [0.1, 0.5, 1, 2, 10]  # relaxation times
+tau = [0.1, 1]
 #tau = [0, 0, 0, 0, 0]
 #tau = [1e6,1e6,1e6,1e6,1e6]
 eta = [g * t for g, t in zip(G, tau)]
@@ -174,10 +176,10 @@ for k in range(len(G)):
 Surface = h_profile
 
 U = np.zeros((n, m))
-M = np.zeros((n, m))
+M = np.zeros((len(G), n, m))
 
 Ac=[]
-M_maxwell = 0
+M_maxwell = np.zeros_like(U)
 
 #######################################
 ###Hertzian contact theory reference
@@ -221,6 +223,7 @@ def update(frame):
 pressure_distributions = []
 for t in np.arange(t0, t1, dt):
     #Update the surface profile
+    M_maxwell[:] = 0
     for k in range(len(G)):
         M_maxwell += gamma[k]*M[k] 
     H_new = alpha*Surface - beta*U + M_maxwell
@@ -238,26 +241,14 @@ for t in np.arange(t0, t1, dt):
 
 
 
-
-
-
-
     #main step3: Update the pressure
     for k in range(len(G)):
-        M_new[k] = gamma[k]*(M_new[k] + G[k]*(U_new[k] - U[k]))
-    #M_new = gamma_k*(M + G_1*(U_new - U))
-
-
-
-
-
-
-
+        M[k] = gamma[k]*(M[k] + G[k]*(U_new - U))
+    #only maxwell branch, see algorithm formula 1 in the notebook
 
 
     Ac.append(np.mean(P > 0)*S)
 
-    M[k] = M_new[k]
     #main step4: Update the total displacement field
     U = U_new
 
