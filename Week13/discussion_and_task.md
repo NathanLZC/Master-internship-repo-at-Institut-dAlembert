@@ -67,22 +67,17 @@ for k in range(len(G)):
     M[k] = gamma[k]*(M[k] + G[k]*(U_new - U))
 ```
 
-
-
-
+The so-called sanity check is to check whether **M_new** = **M_k_new** + **$M^e$** is correct or not, where **$M^e$** is $A_{z z} P_{t+\Delta t}^e$, which is equivalent to $G_{\infty} U_{t+\Delta t}$ .
 
 
 
 ### Task list
 
-[1]
+[1] Add data point at $t=t_0$, we can compute one solution for $\eta=1e6$ or we can regard the generalized Maxwell model only has elastic elements on each branch.
 
-[2]
+[2] Follow the handnotes to add two auxiliary lines with slopes $\frac{1}{\tau_1}$ and $\frac{1}{\tau_2}$, where $\tau_1 < \tau_2$. And we should also have a log-scale plot to have a better visualization of slope change.
 
-[3]
-
-
-
+[3] Do longer simulation for two branches with different relaxation time(0.1s and 1s), and check whether the transition at t = $\tau $ could reach 63% of the Hertz solution for $t=t_{\infty}$ or not. We can also try (0.01s and 1s). We can explain with Ref[4] and the figure in handnotes that our numerical results can never reach the limitation by Hertz solution at $t=t_{\infty}$.
 
 
 
@@ -97,5 +92,7 @@ We plan to talk about how to play with Gitlab to contribute Tamaas project on Fr
 [2] https://tamaas.readthedocs.io/en/latest/index.html
 
 [3] Dillavou, Sam, and Shmuel M. Rubinstein. ‘Nonmonotonic Aging and Memory in a Frictional Interface’. Physical Review Letters 120, no. 22 (1 June 2018): 224101. https://doi.org/10.1103/PhysRevLett.120.224101.
+
+[4] Marques, Severino P. C., and Guillermo J. Creus. Computational Viscoelasticity. SpringerBriefs in Applied Sciences and Technology. Berlin, Heidelberg: Springer Berlin Heidelberg, 2012. https://doi.org/10.1007/978-3-642-25311-9.
 
 
