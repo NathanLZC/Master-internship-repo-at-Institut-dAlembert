@@ -140,7 +140,7 @@ def contact_solver(n, m, W, S, h_profile, tol=1e-6, iter_max=200):
     return displacement, P
 
 ##################################################################
-#####shear modulus for one branch Maxwell model###################
+#####shear modulus for multi-branch Maxwell model###################
 ##################################################################
 G_inf = 2.75 #elastic branch
 #G = [2.75, 2, 0.25, 10, 2.5] #viscoelastic branch
