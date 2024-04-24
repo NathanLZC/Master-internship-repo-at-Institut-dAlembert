@@ -79,7 +79,7 @@ The so-called sanity check is to check whether **M_new** = **M_k_new** + **$M^e$
 
 [3] Do longer simulation for two branches with different relaxation time(0.1s and 1s), and check whether the transition at t = $\tau $ could reach 63% of the Hertz solution for $t=t_{\infty}$ or not. We can also try (0.01s and 1s). We can explain with Ref[4] and the figure in handnotes that our numerical results can never reach the limitation by Hertz solution at $t=t_{\infty}$.
 
-
+[4] Need to explain how the logscale really represent(?-t/$\tau$), and reference line at t_0 and t_inf 
 
 For next step, we have two trends: contribute Tamaas[2] and modify our solver to simulate stress mutation in Ref[3].
 

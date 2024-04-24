@@ -8,7 +8,8 @@ from matplotlib.animation import FuncAnimation
 ##time
 t0 = 0
 t1 = 1
-dt = (t1 - t0)/50
+time_steps = 50
+dt = (t1 - t0)/time_steps
 ##load(constant)
 W = 1e0  # Total load
 

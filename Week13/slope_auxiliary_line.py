@@ -1,7 +1,7 @@
 # Add percentage of contact area in transition process
 # Add auxiliary line to compare with slopes: $\frac{1}{\tau_1}$ and $\frac{1}{\tau_2}$
 # Add log plot to compare with slopes: $\frac{1}{\tau_1}$ and $\frac{1}{\tau_2}$
-# Add sanity check for pressue of elastic branch and Maxwell branches
+# Add sanity check for pressue of elastic branch and Maxwell branches(optional)
 
 ### This script is for the Maxwell multi-branch model.
 ### Deduce process is in generalized_Maxwell_backward_Euler.ipynb
@@ -11,8 +11,9 @@ from matplotlib.animation import FuncAnimation
 #define input parameters
 ##time
 t0 = 0
-t1 = 1 #If we do a long-term, say 10 seconds, we expect to see the slope change from 1/tau1 to 1/tau2 then to zero
-dt = (t1 - t0)/50
+t1 = 5 #If we do a long-term, say 10 seconds, we expect to see the slope change from 1/tau1 to 1/tau2 then to zero
+time_steps = 300
+dt = (t1 - t0)/time_steps
 ##load(constant)
 W = 1e0  # Total load
 
@@ -288,20 +289,41 @@ slope_t0 = (Ac[1] - Ac[0]) / dt
 # Calculate the slope of the tangent line at the last time step
 slope_t1 = (Ac[-1] - Ac[-2]) / dt
 
+# Caluculate the slope of the reference tangent line
+slope_t0_ref = 1 / np.min(tau)
+slope_t1_ref = 1 / np.max(tau)
+
+
+# Define the length of tangent lines
+tangent_length = 0.3  # Smaller range for tangent line visualization
+
 # Plot the tangent lines
-plt.plot([t0, t1], [Ac[0], Ac[0] + slope_t0 * (t1 - t0)], 'r--')
-plt.plot([t0, t1], [Ac[-1], Ac[-1] + slope_t1 * (t1 - t0)], 'b--')
+plt.plot([t0, t0 + tangent_length], [Ac[0], Ac[0] + slope_t0 * tangent_length], 'r--', label='Tangent at Start')
+plt.plot([t1 - tangent_length, t1], [Ac[-1] - slope_t1 * tangent_length, Ac[-1]], 'b--', label='Tangent at End')
 
-
-
+# Plot the reference tangent lines
+adjusment = 0.05
+plt.plot([t0, t0 + tangent_length*adjusment], [Ac[0], Ac[0] + slope_t0_ref * tangent_length*adjusment], 'r:', label='Tangent at Start (Ref)')
+plt.plot([t1 - tangent_length*adjusment, t1], [Ac[-1] - slope_t1_ref * tangent_length*adjusment, Ac[-1]], 'b:', label='Tangent at End (Ref)')
 
 plt.plot(np.arange(t0, t1, dt), Ac)
 plt.axhline(Ac_hertz_t0, color='red', linestyle='dotted')
 plt.axhline(Ac_hertz_t_inf, color='blue', linestyle='dotted')
 plt.xlabel("Time(s)")
 plt.ylabel("Contact area($m^2$)")
-plt.legend(["Numerical", "Hertz at t=0", "Hertz at t=inf"])
+plt.legend(["Tangent at Start", "Tangent at End", "Tangent at Start (Ref)", "Tangent at End (Ref)","Numerical", "Hertz at t=0", "Hertz at t=inf"])
 #define a title that can read parameter tau_0
 plt.title("Contact area vs time for multi-branch Generalized Maxwell model")
 #plt.axhline(Ac_hertz_t_inf, color='blue')
+plt.show()
+
+
+# Plot the log plot
+plt.plot(np.arange(t0, t1, dt), Ac)
+
+plt.yscale('log')
+plt.xscale('log')
+plt.ylabel("Contact area($m^2$) (log scale)")
+plt.xlabel("Time(s)")
+plt.title("Contact area vs time for multi-branch Generalized Maxwell model (log scale)")
 plt.show()
