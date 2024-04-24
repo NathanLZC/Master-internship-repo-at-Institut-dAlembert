@@ -199,26 +199,29 @@ M = np.zeros((n, m))
 
 Ac=[]
 
+
+M_k_new = 0
 for t in np.arange(t0, t1, dt):
+
     #Update the surface profile
-    H_new = alpha*Surface - beta*U + gamma_k*M
+    H_new = alpha*Surface - beta*U + gamma_k*M_k_new
 
     #main step1: Compute $P_{t+\Delta t}^{\prime}$
     #M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
     M_new, P = contact_solver(n, m, W, S, H_new, tol=1e-6, iter_max=200)
 
     ##Sanity check??
-
+    
 
 
     ##main step2: Update global displacement
-    U_new = (1/alpha)*(M_new - gamma_k*M + beta*U)
+    U_new = (1/alpha)*(M_new - gamma_k*M_k_new + beta*U)
 
 
 
     #main step3: Update the pressure
     #M_new[k] = gamma_k*(M_new[k] + G[k]*(U_new[k] - U[k]))
-    M_new = gamma_k*(M + G_1*(U_new - U))
+    M_k_new = gamma_k*(M_k_new + G_1*(U_new - U))
 
 
     Ac.append(np.mean(P > 0)*S)
@@ -226,8 +229,6 @@ for t in np.arange(t0, t1, dt):
     M = M_new
     #main step4: Update the total displacement field
     U = U_new
-
-
 
 
 #######################################
