@@ -1,4 +1,4 @@
-### This script is for the Maxwell one branch model.
+### This script is for the Maxwell multi-branch model.
 ### Deduce process is in generalized_Maxwell_backward_Euler.ipynb
 
 import numpy as np
