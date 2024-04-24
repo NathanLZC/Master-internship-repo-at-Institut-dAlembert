@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 ##time
 t0 = 0
 t1 = 1
-dt = (t1 - t0)/50
+time_steps = 50
+dt = (t1 - t0)/time_steps
 ##load(constant)
 W = 1e0  # Total load
 
@@ -59,29 +60,6 @@ def apply_integration_operator(Origin, kernel_fourier, h_profile):
     Gradient = Middle - h_profile
 
     return Gradient, Origin2fourier#true gradient
-
-
-
-
-
-def recover_original_image(Gradient, kernel_fourier, h_profile):
-    Middle = Gradient + h_profile
-    
-    Middle_fourier = np.fft.fft2(Middle, norm='ortho')
-    
-    Origin2fourier = Middle_fourier / kernel_fourier
-
-    P = np.fft.ifft2(Origin2fourier, norm='ortho').real  
-
-    return P
-
-
-
-
-
-
-
-
 
 ##define our elastic solver with constrained conjuagte gradient method
 
