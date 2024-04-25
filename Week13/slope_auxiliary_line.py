@@ -155,7 +155,7 @@ print('G_inf:', G_inf, ' G: ' + str(G))
 
 # Define the relaxation times
 #tau = [0.1, 0.5, 1, 2, 10]  # relaxation times
-tau = [0.1, 1]
+tau = [0.01, 1]
 #tau = [0, 0, 0, 0, 0]
 #tau = [1e6,1e6,1e6,1e6,1e6]
 eta = [g * t for g, t in zip(G, tau)]

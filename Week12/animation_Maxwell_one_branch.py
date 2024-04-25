@@ -159,7 +159,7 @@ G_1 = 2.75
 print('G_inf:', G_inf, ' G_1:', G_1)
 
 # Define the relaxation times
-tau_1 = 0.1
+tau_1 = 1
 eta_1 = G_1 * tau_1
 
 ##################################################################
@@ -275,6 +275,7 @@ print("Numerical contact area at t0:", Ac[0])
 print("Numerical contact area at t_inf",  Ac[-1])
 print("Analyical contact area at t0:", Ac_hertz_t0)
 print("Analyical contact area at t_inf:", Ac_hertz_t_inf)
+print("Percentage of transition", Ac[-1]/Ac_hertz_t_inf)
 plt.plot(np.arange(t0, t1, dt), Ac)
 plt.axhline(Ac_hertz_t0, color='red', linestyle='dotted')
 plt.axhline(Ac_hertz_t_inf, color='blue', linestyle='dotted')
