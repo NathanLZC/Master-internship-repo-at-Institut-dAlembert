@@ -11,7 +11,7 @@ from matplotlib.animation import FuncAnimation
 #define input parameters
 ##time
 t0 = 0
-t1 = 5 #If we do a long-term, say 10 seconds, we expect to see the slope change from 1/tau1 to 1/tau2 then to zero
+t1 = 1 #If we do a long-term, say 10 seconds, we expect to see the slope change from 1/tau1 to 1/tau2 then to zero
 time_steps = 300
 dt = (t1 - t0)/time_steps
 ##load(constant)
@@ -24,8 +24,8 @@ Radius = 0.5
 S = L**2  # Domain area
 
 # Generate a 2D coordinate space
-n = 300
-m = 300
+n = 512
+m = 512
 
 x, y = np.meshgrid(np.linspace(0, L, n, endpoint=False), np.linspace(0, L, m, endpoint=False))
 
@@ -149,13 +149,13 @@ def contact_solver(n, m, W, S, h_profile, tol=1e-6, iter_max=200):
 ############################################################################################################
 G_inf = 2.75 #elastic branch
 #G = [2.75, 2, 0.25, 10, 2.5] #viscoelastic branch
-G = [2.75, 2.75]
+G = [2.75]#[2.75, 2.75]
 
 print('G_inf:', G_inf, ' G: ' + str(G))
 
 # Define the relaxation times
 #tau = [0.1, 0.5, 1, 2, 10]  # relaxation times
-tau = [0.01, 1]
+tau = [1]#[0.01, 1]
 #tau = [0, 0, 0, 0, 0]
 #tau = [1e6,1e6,1e6,1e6,1e6]
 eta = [g * t for g, t in zip(G, tau)]
@@ -290,8 +290,8 @@ slope_t0 = (Ac[1] - Ac[0]) / dt
 slope_t1 = (Ac[-1] - Ac[-2]) / dt
 
 # Caluculate the slope of the reference tangent line
-slope_t0_ref = 1 / np.min(tau)
-slope_t1_ref = 1 / np.max(tau)
+slope_t0_ref = 1 / np.min(tau)*Ac_hertz_t_inf
+slope_t1_ref = 1 / np.max(tau)*Ac_hertz_t_inf
 
 
 # Define the length of tangent lines
@@ -303,8 +303,10 @@ plt.plot([t1 - tangent_length, t1], [Ac[-1] - slope_t1 * tangent_length, Ac[-1]]
 
 # Plot the reference tangent lines
 adjusment = 0.05
-plt.plot([t0, t0 + tangent_length*adjusment], [Ac[0], Ac[0] + slope_t0_ref * tangent_length*adjusment], 'r:', label='Tangent at Start (Ref)')
-plt.plot([t1 - tangent_length*adjusment, t1], [Ac[-1] - slope_t1_ref * tangent_length*adjusment, Ac[-1]], 'b:', label='Tangent at End (Ref)')
+plt.axline([t0, Ac[0]], slope=slope_t0_ref, color='r', linestyle='dotted', label='Tangent at Start (Ref)')
+plt.axline([t1, Ac[-1]], slope=slope_t1_ref, color='b', linestyle='dotted', label='Tangent at End (Ref)')
+#plt.plot([t0, t0 + tangent_length*adjusment], [Ac[0], Ac[0] + slope_t0_ref * tangent_length*adjusment], 'r:', label='Tangent at Start (Ref)')
+#plt.plot([t1 - tangent_length*adjusment, t1], [Ac[-1] - slope_t1_ref * tangent_length*adjusment, Ac[-1]], 'b:', label='Tangent at End (Ref)')
 
 plt.plot(np.arange(t0, t1, dt), Ac)
 plt.axhline(Ac_hertz_t0, color='red', linestyle='dotted')
