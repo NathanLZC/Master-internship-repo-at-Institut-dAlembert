@@ -64,6 +64,12 @@ If we already link our local repo and remote repo with SSH, then a new branch wi
 git push -u origin maxwell_viscoelastic-branch
 ```
 
+When we need to develop on our branch, we can just switch to this branch using the following command:
+
+```bash
+git checkout maxwell_viscoelastic-branch
+```
+
 ##### Reference:
 
 [1] https://tamaas.readthedocs.io/en/latest/
