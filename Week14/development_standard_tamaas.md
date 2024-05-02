@@ -49,15 +49,79 @@ Optional dependencies[2] are:
 - googletest and pytest (for tests)
 - Doxygen and Sphinx (for documentation)
 
+### Main steps for installation from source:
+
+1. Clone from GitLab: 
+```bash
+git clone --recursive https://gitlab.com/tamaas/tamaas.git
+```
+2. Go to tamaas folder, and compile Tamaas with the default options by SCons
+```bash
+cd tamaas/
+scons
+```
 #### SCons
 
-To install SCons, which is a software construction tool used as a build system:
+Attention: To install SCons, which is a software construction tool used as a build system:
 
 - Via **pip** (recommended for most users): Run `pip install scons`.
 - Alternatively, if you prefer using a package manager on Linux: Use `sudo apt-get install scons` for Debian/Ubuntu or `sudo yum install scons` for Fedora/RHEL.
 
-#### thrust 
+P.S. : If you don't have root access on the Linux machine to install SCons using `sudo apt-get install scons`, you can install SCons locally using Python's package manager, pip, which doesn't require root permissions:
 
+- **Install SCons Locally Using Pip**:
+     ```bash
+     pip install --user scons
+     ```
+   This command installs SCons in your user directory, typically under `~/.local/bin`, which avoids the need for root privileges.
+
+- **Update Your PATH**:
+   - To use SCons from the terminal, ensure the directory where SCons was installed (`~/.local/bin`) is in your PATH. You can add this to your PATH by running:
+     ```bash
+     echo 'export PATH=$PATH:~/.local/bin' >> ~/.bashrc
+     source ~/.bashrc
+     ```
+
+3. After compiling a first time, you can edit the compilation options in the file *build-setup.conf*
+4. 
+
+#### FFTW3
+
+If you lack root access on a Linux machine, you can specify the file path in *build-setup.conf*.
+
+#### Boost
+
+If you lack root access on a Linux machine and can't install Boost via standard package managers, you can try a user-level installation or other methods. Here are some steps:
+
+- **Install Boost from source**:
+   - Download the Boost source code:
+     ```bash
+     wget https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz
+     ```
+   - Unpack the downloaded file:
+     ```bash
+     tar xfz boost_1_76_0.tar.gz
+     ```
+   - Go to the unpacked directory and configure with Bootstrap:
+     ```bash
+     cd boost_1_76_0
+     ./bootstrap.sh --prefix=$HOME/local
+     ```
+   - Build and install:
+     ```bash
+     ./b2 install
+     ```
+
+   This will install Boost in the `local` folder in your home directory. Make sure your project build system can find the libraries in this directory.
+
+- **Set environment variables**:
+   - Add the `CPLUS_INCLUDE_PATH` environment variable to your `.bashrc` or `.bash_profile` to help the compiler locate the Boost headers:
+     ```bash
+     echo 'export CPLUS_INCLUDE_PATH=$HOME/local/include:$CPLUS_INCLUDE_PATH' >> ~/.bashrc
+     source ~/.bashrc
+     ```
+
+#### thrust 
 
 
 
