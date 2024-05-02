@@ -83,7 +83,7 @@ P.S. : If you don't have root access on the Linux machine to install SCons using
      ```
 
 3. After compiling a first time, you can edit the compilation options in the file *build-setup.conf*
-4. 
+
 
 #### FFTW3
 
@@ -122,8 +122,44 @@ If you lack root access on a Linux machine and can't install Boost via standard 
      ```
 
 #### thrust 
+We can see more info by:
+```bash
+cat config.log 
+```
+
+For **thrust** and **cuda**, we can 
+
+```bash
+git clone https://github.com/NVIDIA/cccl.git
+```
+
+Automatically change *build-setup.conf* by:
+
+```bash
+scons THURST_ROOT=../cccl/thrust
+scons LIBCUDACXX_ROOT=../cccl/libcudacxx
+scons CXXFLAGS='-I/gagarine/temporaires/zli/cccl/libcudacxx/include
+```
+
+```bash
+scons verbose=true
+```
+
+#### pybind11
+
+```bash
+git clone https://github.com/pybind/pybind11.git
+scons PYBIND11_ROOT=../pybind11
+```
 
 
+```bash
+scons build_tests=true
+```
+
+```bash
+pip install -e build-release/pt
+```
 
 #### Reference:
 
