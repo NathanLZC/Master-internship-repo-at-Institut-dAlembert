@@ -70,6 +70,29 @@ When we need to develop on our branch, we can just switch to this branch using t
 git checkout maxwell_viscoelastic-branch
 ```
 
+Additionally, using `git stash` is a handy way to temporarily shelve (or stash) changes you've made to your working directory so you can work on something else, and then come back and re-apply them later on. Here's a step-by-step guide on how you can use this feature in conjunction with merging:
+
+1. **Stash Your Changes**:
+   - Before merging, make sure you're on the branch where you've made your changes. If you have any uncommitted changes that you don't want to commit yet, you can stash them.
+   - Run `git stash` to stash your changes. This command saves your modifications and reverts the working directory to match the HEAD commit.
+   - Optionally, you can use `git stash push -m "Your message"` to add a description to your stash for easier identification later.
+
+2. **Merge the Changes**:
+   - Switch to the branch where you want to merge the changes. For instance, if you're merging into your current branch from `master`, you'd stay on your current branch.
+   - Run `git merge master` to merge changes from the master branch into your current branch. Resolve any conflicts if they arise.
+
+3. **Reapply Your Stashed Changes**:
+   - Once the merge is complete and you're ready to get back to your work, run `git stash pop`. This command applies the stashed changes back to your working directory and removes them from the stash list.
+   - If you want to keep the stash in your stash list, you can use `git stash apply` instead. This re-applies the changes but does not remove them from the stash.
+
+4. **Handle Merge Conflicts**:
+   - If your stashed changes conflict with the changes from the merge, you'll need to resolve these conflicts manually. Git will prompt you to fix the conflicts before completing the `git stash pop`.
+   - After resolving any conflicts, if you used `git stash pop`, make sure to commit these resolved changes to finalize the merge process.
+
+Using `git stash` is particularly useful when you need to quickly switch contexts. For example, if you do not want to discard changes before merging, and don't want to create a commit either, you can `git stash` before the merge, `git merge master` then `git stash pop` to re-apply your old changes. It allows for a clean workflow without losing any of your work.
+
+
+
 ##### Reference:
 
 [1] https://tamaas.readthedocs.io/en/latest/
