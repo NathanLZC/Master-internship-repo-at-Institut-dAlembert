@@ -302,7 +302,7 @@ plt.plot([t0, t0 + tangent_length], [Ac[0], Ac[0] + slope_t0 * tangent_length], 
 plt.plot([t1 - tangent_length, t1], [Ac[-1] - slope_t1 * tangent_length, Ac[-1]], 'b--', label='Tangent at End')
 
 # Plot the reference tangent lines
-adjusment = 0.05
+#adjusment = 0.05
 plt.axline([t0, Ac[0]], slope=slope_t0_ref, color='r', linestyle='dotted', label='Tangent at Start (Ref)')
 plt.axline([t1, Ac[-1]], slope=slope_t1_ref, color='b', linestyle='dotted', label='Tangent at End (Ref)')
 #plt.plot([t0, t0 + tangent_length*adjusment], [Ac[0], Ac[0] + slope_t0_ref * tangent_length*adjusment], 'r:', label='Tangent at Start (Ref)')
