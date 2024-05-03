@@ -161,6 +161,40 @@ scons build_tests=true
 pip install -e build-release/pt
 ```
 
+
+
+### We can also run tests with a virtual environment on your lab computer
+
+First we merge master into our branch to get these changes.
+
+You'll need to download a script to install pip
+
+```bash
+wget https://bootstrap.pypa.io/get-pip.py
+```
+
+Then create a virtualenv and boostrap pip
+
+```bash
+python3 -m venv --without-pip tamaas_venv
+source tamaas_venv/bin/activate
+python3 get-pip.py
+pip install scons pytest
+```
+
+Then you can compile tamaas as usual, then run
+
+```bash
+pip install -e build-release/python
+scons test
+```
+
+This should run a minimal number of tests. You can also `pip install scipy` if you wish, but we won't need scipy for the project.
+
+
+
+
+
 #### Reference:
 
 [1] https://tamaas.readthedocs.io/en/latest/developer.html
