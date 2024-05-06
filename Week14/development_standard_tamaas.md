@@ -266,6 +266,7 @@ git push origin maxwell_viscoelastic-branch
 Since it is a little bit complex(but very useful), we can connect this lab computer by SSH:
 
 ```bash
+zli@renoir:~/tamaas$ hostname
 zli@renoir:~/tamaas$ ping hostname.xxxx.xxx.fr
 zli@renoir:~/tamaas$ ip a
 zli@renoir:~/tamaas$ ssh username@hostname.xxxx.xxx.fr
