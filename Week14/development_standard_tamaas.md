@@ -170,6 +170,7 @@ First we merge master into our branch to get these changes.
 You'll need to download a script to install pip
 
 ```bash
+conda deactivate
 wget https://bootstrap.pypa.io/get-pip.py
 ```
 
@@ -182,7 +183,57 @@ python3 get-pip.py
 pip install scons pytest
 ```
 
-Then you can compile tamaas as usual, then run
+Then Wwe can compile tamaas as usual: 
+```bash
+git clone --recursive https://gitlab.com/tamaas/tamaas.git
+cd tamaas
+scons
+```
+Some third-party packages need to be specified their file path in *build-setup.conf*, commands can be used:
+```bash
+scons THRUST_ROOT=../cccl/thrust
+```
+
+If we meet the following error, it may relate to the release version[https://github.com/NVIDIA/cccl/releases]:
+
+```bash
+scons: Building targets ...
+[Compiling (g++)] build-release/src/core/fft_engine.cpp
+In file included from build-release/src/core/tamaas.hh:79,
+                 from build-release/src/core/allocator.hh:26,
+                 from build-release/src/core/array.hh:26,
+                 from build-release/src/core/grid_base.hh:26,
+                 from build-release/src/core/grid.hh:26,
+                 from build-release/src/core/fft_engine.hh:26,
+                 from build-release/src/core/fft_engine.cpp:23:
+/gagarine/temporaires/zli/cccl/thrust/thrust/complex.h:232:3: error: ‘__host__’ does not name a type
+  232 |   __host__ THRUST_STD_COMPLEX_DEVICE
+      |   ^~~~~~~~
+```
+It has been solved in this commit:
+```bash
+commit b23118dba62f32aa9ea3684aab04530118787dc9 Author: Lucas Frérot <lucas.frerot@sorbonne-universite.fr> Date:   Thu May 2 17:55:43 2024 +0200      setting complex type from thrust          CCCL goes back and forth between cuda::std::complex and thrust::complex, it's     super annoying 
+```
+
+```bash
+(tamaas_venv) zli@renoir:~/tamaas$ rm -rf build-release/
+```
+Now, we need to go to v2.3.1, where they revert refactor `thrust::complex` as a struct derived from `cuda::std::complex`
+
+```bash
+(tamaas_venv) zli@renoir:~/tamaas$ cd ../cccl
+(tamaas_venv) zli@renoir:~/tamaas$ git checkout v2.3.1
+```
+
+Then we can go back to tamaas folder to compile it in parallel(for 24 cores) by:
+
+```bash
+cd -
+scons -j24
+scons build_tests=True
+```
+
+then run:
 
 ```bash
 pip install -e build-release/python
@@ -191,9 +242,13 @@ scons test
 
 This should run a minimal number of tests. You can also `pip install scipy` if you wish, but we won't need scipy for the project.
 
+Finally, we should go to our branch and test our scipt(by add cpp filename in *src/SConscript*): 
 
-
-
+```bash
+(tamaas_venv) zli@renoir:~/tamaas$ git checkout maxwell_viscoelastic-branch
+(tamaas_venv) zli@renoir:~/tamaas$ git merge master
+(tamaas_venv) zli@renoir:~/tamaas$ scons -j24
+```
 
 #### Reference:
 
