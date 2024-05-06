@@ -161,6 +161,7 @@ scons build_tests=true
 pip install -e build-release/pt
 ```
 
+Besides, in `tamaas/third-party/pybind11`, there is also a **pybind11** available.
 
 
 ### We can also run tests with a virtual environment on your lab computer
@@ -249,6 +250,19 @@ Finally, we should go to our branch and test our scipt(by add cpp filename in *s
 (tamaas_venv) zli@renoir:~/tamaas$ git merge master
 (tamaas_venv) zli@renoir:~/tamaas$ scons -j24
 ```
+
+P.S.: If we do merge manually, we may be suggested to add a message like: *Merge branch 'master' into maxwell_viscoelastic-branch*.
+
+#### Remote work with lab computer
+
+Since it is a little bit complex(but very useful), we can connect this lab computer by SSH:
+
+```bash
+zli@renoir:~/tamaas$ ping hostname.xxxx.xxx.fr
+zli@renoir:~/tamaas$ ip a
+zli@renoir:~/tamaas$ ssh username@hostname.xxxx.xxx.fr
+```
+
 
 #### Reference:
 
