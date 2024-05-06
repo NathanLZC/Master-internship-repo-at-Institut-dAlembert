@@ -47,4 +47,21 @@ public:
                       std::vector<Real> characteristic_time);
   ~MaxwellViscoelastic() override = default;
 
+public:
+  /// \cond DO_NOT_DOCUMENT
+  using PolonskyKeerRey::solve;
+  ///\endcond
+
+  /// Solve
+  Real solve(std::vector<Real> target) override;
+  /// Mean on unsaturated constraint zone
+  Real meanOnUnsaturated(const GridBase<Real>& field) const override;
+  /// Compute squared norm
+  Real computeSquaredNorm(const GridBase<Real>& field) const override;
+  /// Update search direction
+  void updateSearchDirection(Real factor) override;
+  /// Compute critical step
+  Real computeCriticalStep(Real target = 0) override;
+  /// Update primal and check non-admissible state
+  bool updatePrimal(Real step) override;
 #endif  // MAXWELL_VISCOELASTIC_HH
