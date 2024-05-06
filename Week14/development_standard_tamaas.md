@@ -136,7 +136,7 @@ git clone https://github.com/NVIDIA/cccl.git
 Automatically change *build-setup.conf* by:
 
 ```bash
-scons THURST_ROOT=../cccl/thrust
+scons THRUST_ROOT=../cccl/thrust
 scons LIBCUDACXX_ROOT=../cccl/libcudacxx
 scons CXXFLAGS='-I/gagarine/temporaires/zli/cccl/libcudacxx/include
 ```
