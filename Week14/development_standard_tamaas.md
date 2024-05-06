@@ -251,7 +251,15 @@ Finally, we should go to our branch and test our scipt(by add cpp filename in *s
 (tamaas_venv) zli@renoir:~/tamaas$ scons -j24
 ```
 
-P.S.: If we do merge manually, we may be suggested to add a message like: *Merge branch 'master' into maxwell_viscoelastic-branch*.
+P.S.: If we do merge manually, we may be suggested to add a message like: *Merge branch 'master' into maxwell_viscoelastic-branch*. And don't forget to check you are pushing from your local branch to your remote branch:
+
+```bash
+git remote -v
+git remote set-url origin git@gitlab.com:tamaas/tamaas.git
+git push origin maxwell_viscoelastic-branch
+```
+
+
 
 #### Remote work with lab computer
 
