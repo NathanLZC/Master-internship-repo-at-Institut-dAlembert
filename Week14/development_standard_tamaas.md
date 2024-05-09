@@ -166,8 +166,6 @@ Besides, in `tamaas/third-party/pybind11`, there is also a **pybind11** availabl
 
 ### We can also run tests with a virtual environment on your lab computer
 
-First we merge master into our branch to get these changes.
-
 You'll need to download a script to install pip
 
 ```bash
