@@ -6,8 +6,6 @@
  *  Laboratory (IJLRDA - Institut Jean Le Rond d'Alembert)
  *  Copyright (©) 2020-2024 Lucas Frérot
  *
- *  Part of codes in this script is insipred by Copilot and GPT-4.
- *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
  *  by the Free Software Foundation, either version 3 of the License, or
@@ -26,25 +24,24 @@
 #ifndef MAXWELL_VISCOELASTIC_HH
 #define MAXWELL_VISCOELASTIC_HH
 /* -------------------------------------------------------------------------- */
-#include "contact_solver.hh"
-#include "grid_view.hh"
-#include "meta_functional.hh"
+#include "polonsky_keer_rey.hh"
 #include "westergaard.hh"
 /* -------------------------------------------------------------------------- */
 namespace tamaas {
 
-class MaxwellViscoelastic : public PolonskyKeerRey {
+class MaxwellViscoelastic : public ContactSolver {
 public:
   /// Types of algorithm (primal/dual) or constraint
   enum type { gap, pressure };
 
-public:
-  /// Constructor
-  MaxwellViscoelastic(Model& model, const GridBase<Real>& surface,
-                      Real tolerance, type variable_type, type constraint_type,
-                      Real viscosity, Real time_step,
-                      std::vector<Real> shear_modulus,
-                      std::vector<Real> characteristic_time);
+  pubilc :
+      /// Constructor
+      MaxwellViscoelastic(Model& model, const GridBase<Real>& surface,
+                          Real tolerance, type variable_type,
+                          type constraint_type, Real viscosity, Real time_step,
+                          Real shear_modulus_elastic,
+                          std::vector<Real> shear_modulus_maxwell,
+                          std::vector<Real> characteristic_time);
   ~MaxwellViscoelastic() override = default;
 
 public:
@@ -52,16 +49,20 @@ public:
   using PolonskyKeerRey::solve;
   ///\endcond
 
-  /// Solve
-  Real solve(std::vector<Real> target) override;
-  /// Mean on unsaturated constraint zone
-  Real meanOnUnsaturated(const GridBase<Real>& field) const override;
-  /// Compute squared norm
-  Real computeSquaredNorm(const GridBase<Real>& field) const override;
-  /// Update search direction
-  void updateSearchDirection(Real factor) override;
-  /// Compute critical step
-  Real computeCriticalStep(Real target = 0) override;
-  /// Update primal and check non-admissible state
-  bool updatePrimal(Real step) override;
-#endif  // MAXWELL_VISCOELASTIC_HH
+  /// Compute the viscosity \eta from shear moduli and characteristic
+  /// time(relaxation time)
+  virtual std::vector<Real>
+  viscosityEta(const std::vector<Real>& shear_modulus_maxwell,
+               const std::vector<Real>& characteristic_time) const;
+  /// Compute the effective shear moduli for maxwell branches
+  virtual Real
+  computeGtilde(const Real& time_step,
+                const std::vector<Real>& shear_modulus_maxwell,
+                const std::vector<Real>& characteristic_time) const;
+  /// Compute the partial displacement coefficient for each maxwell branch to
+  /// update surface
+  virtual std::vector<Real>
+  computeGamma(const Real& time_step,
+               const std::vector<Real>& shear_modulus_maxwell,
+               const std::vector<Real>& characteristic_time) const;
+  ///
