@@ -1,10 +1,12 @@
-We plan to contribute our solver to open-source Tamaas project(https://tamaas.readthedocs.io/en/latest/) by creating merge requests(https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html#new-merge-request-from-a-fork).
+We plan to contribute our solver to open-source [Tamaas project](https://tamaas.readthedocs.io/en/latest/) by creating [merge requests](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html#new-merge-request-from-a-fork).
 
-We can start to learn how to play with git, especially how to merge branches, we have installed GitLab Workflow extension for VS Code (https://docs.gitlab.com/ee/editor_extensions/visual_studio_code/). 
+We can start to learn how to play with git, especially how to merge branches, we have installed GitLab Workflow extension for [VS Code](https://docs.gitlab.com/ee/editor_extensions/visual_studio_code/). 
 
 We also installed blender, we will try to learn this rendering skill as well.
 
 To initiate our work on GitLab, we follow the steps in [3]. We have been added in Tamaas project as developer, so we plan to play with our branch. Here we first clone from **master** branch of Tamaas[1].
+
+#### Useful commands
 
 Some useful commands are listed:
 
@@ -15,6 +17,56 @@ git remote --verbose
 git checkout -b maxwell_viscoelastic-branch 
 git branch -a
 ```
+
+##### Recommended Workflow
+
+Ensure your local `master` branch is up to date, and create new feature branches from the latest `master` branch:
+
+1. Fetch All Remote Updates
+```bash
+git fetch --all
+```
+*If you want to temporarily save your local changes before merging:*
+```bash
+git stash
+```
+2. Merge Updates into Local `master`
+```bash
+git checkout master
+git merge origin/master
+```
+3. Switch to Your Feature Branch
+```bash
+git checkout mybranch
+git merge master  # For existing branches
+```
+4. Alternatively, Create a New Feature Branch
+```bash
+git checkout -b newbranch
+git merge master  # For existing branches
+```
+
+*If you stashed your changes earlier, apply them back to your feature branch:*
+```bash
+git stash pop
+```
+*Resolve conflicts:*
+
+- Resolve manually
+- Mark as resolved:
+
+```bash
+git add <resolved-files>
+git commit -m "Resolved merge conflicts"
+```
+
+##### Summary
+
+Make sure your local master branch is synchronized with the remote master branch, then create or update your feature branches based on the latest master to ensure your development branch includes the most recent changes.
+
+
+
+#### Configure GitLab
 
 Before everything started, we should deal with SSH:
 
@@ -52,6 +104,8 @@ ssh -T git@gitlab.com
 git remote set-url origin git@gitlab.com:tamaas/tamaas.git
 ```
 
+#### Deal with branches
+
 When we talk about git, we should be clear with local and remote repo, for GitLab, we can easily create a New branch by clicking **New branch** on GitLab webpage, or use command:
 
 ```bash
@@ -69,6 +123,7 @@ When we need to develop on our branch, we can just switch to this branch using t
 ```bash
 git checkout maxwell_viscoelastic-branch
 ```
+#### Deal with potential conflict
 
 Additionally, using `git stash` is a handy way to temporarily shelve (or stash) changes you've made to your working directory so you can work on something else, and then come back and re-apply them later on. Here's a step-by-step guide on how you can use this feature in conjunction with merging:
 
@@ -93,7 +148,7 @@ Using `git stash` is particularly useful when you need to quickly switch context
 
 
 
-##### Reference:
+#### Reference:
 
 [1] https://tamaas.readthedocs.io/en/latest/
 
