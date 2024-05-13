@@ -11,3 +11,10 @@ Model containing pressure and displacement. This class is a container for the mo
 `model.hh` contains getDiscretization() function, we can use this function for *n* and *m* variable of our python script.
 
 
+
+
+
+#### solvers
+
+##### polonsky_keer_rey
+
