@@ -27,17 +27,24 @@
 
 namespace tamaas {
 
-maxwell_viscoelastic::maxwell_viscoelastic(Model& model, const GridBase<Real>& surface,
-                                           Real tolerance, type variable_type, type constraint_type,
-                                           Real viscosity, Real time_step,
-                                           std::vector<Real> shear_modulus,
-                                           std::vector<Real> characteristic_time)
-  : PolonskyKeerRey(model, surface, tolerance, variable_type, constraint_type),
-    viscosity_(viscosity), time_step_(time_step),
-    shear_modulus_(shear_modulus), characteristic_time_(characteristic_time)
-{
+MaxwellViscoelastic::MaxwellViscoelastic(Model& model,
+                                         const GridBase<Real>& surface,
+                                         Real tolerance, Real time_step,
+                                         std::vector<Real> shear_modulus,
+                                         std::vector<Real> characteristic_time)
+    : PolonskyKeerRey(model, surface, tolerance, PolonskyKeerRey::pressure,
+                      PolonskeKeerRey::pressure),
+      time_step_(time_step), shear_modulus_(shear_modulus),
+      characteristic_time_(characteristic_time) {
   // Check that the number of shear moduli and characteristic times is correct
   if (shear_modulus_.size() != characteristic_time_.size()) {
-    throw std::invalid_argument("The number of shear moduli and characteristic times must be equal.");
+    throw std::invalid_argument(
+        "The number of shear moduli and characteristic times must be equal.");
   }
 }
+
+/* ------------------------------------------------------------------------- */
+
+
+}  // namespace tamaas
+/* ------------------------------------------------------------------------- */

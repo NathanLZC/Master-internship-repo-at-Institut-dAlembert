@@ -24,22 +24,18 @@
 #ifndef MAXWELL_VISCOELASTIC_HH
 #define MAXWELL_VISCOELASTIC_HH
 /* -------------------------------------------------------------------------- */
+#include "contact_solver.hh"
 #include "polonsky_keer_rey.hh"
 #include "westergaard.hh"
 /* -------------------------------------------------------------------------- */
 namespace tamaas {
 
-class MaxwellViscoelastic : public ContactSolver {
+class MaxwellViscoelastic : public PolonskyKeerRey {
 public:
-  /// Types of algorithm (primal/dual) or constraint
-  enum type { gap, pressure };
-
   pubilc :
       /// Constructor
       MaxwellViscoelastic(Model& model, const GridBase<Real>& surface,
-                          Real tolerance, type variable_type,
-                          type constraint_type, Real viscosity, Real time_step,
-                          Real shear_modulus_elastic,
+                          Real tolerance, Real time_step,
                           std::vector<Real> shear_modulus_maxwell,
                           std::vector<Real> characteristic_time);
   ~MaxwellViscoelastic() override = default;
@@ -49,11 +45,6 @@ public:
   using PolonskyKeerRey::solve;
   ///\endcond
 
-  /// Compute the viscosity \eta from shear moduli and characteristic
-  /// time(relaxation time)
-  virtual std::vector<Real>
-  viscosityEta(const std::vector<Real>& shear_modulus_maxwell,
-               const std::vector<Real>& characteristic_time) const;
   /// Compute the effective shear moduli for maxwell branches
   virtual Real
   computeGtilde(const Real& time_step,
@@ -65,4 +56,8 @@ public:
   computeGamma(const Real& time_step,
                const std::vector<Real>& shear_modulus_maxwell,
                const std::vector<Real>& characteristic_time) const;
-  ///
+  /// Main solve function with backward euler scheme
+  Real solve(std::vector<Real> target) override;
+}
+
+}  // namespace tamaas
