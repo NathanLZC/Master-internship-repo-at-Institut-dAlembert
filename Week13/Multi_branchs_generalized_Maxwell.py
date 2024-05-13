@@ -14,7 +14,7 @@ dt = (t1 - t0)/time_steps
 W = 1e0  # Total load
 
 #domain size
-R = 1  # Radius of demi-sphere
+#R = 1  # Radius of demi-sphere
 L = 2  # Domain size
 Radius = 0.5
 S = L**2  # Domain area
