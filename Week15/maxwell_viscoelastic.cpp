@@ -33,7 +33,7 @@ MaxwellViscoelastic::MaxwellViscoelastic(Model& model,
                                          std::vector<Real> shear_modulus,
                                          std::vector<Real> characteristic_time)
     : PolonskyKeerRey(model, surface, tolerance, PolonskyKeerRey::pressure,
-                      PolonskeKeerRey::pressure),
+                      PolonskyKeerRey::pressure),
       time_step_(time_step), shear_modulus_(shear_modulus),
       characteristic_time_(characteristic_time) {
   // Check that the number of shear moduli and characteristic times is correct
@@ -44,7 +44,30 @@ MaxwellViscoelastic::MaxwellViscoelastic(Model& model,
 }
 
 /* ------------------------------------------------------------------------- */
+Real MaxwellViscoelastic::computeGtilde(
+    const Real& time_step, const std::vector<Real>& shear_modulus,
+    const std::vector<Real>& characteristic_time) const {
+  Real gtilde = 0;
+  for (size_t i = 0; i < shear_modulus.size(); ++i) {
+    gtilde += shear_modulus[i] * characteristic_time[i] /
+              (characteristic_time[i] + time_step);
+  }
+  return gtilde;
+}
 
+/* ------------------------------------------------------------------------- */
+std::vector<Real> MaxwellViscoelastic::computeGamma(
+    const Real& time_step, const std::vector<Real>& shear_modulus,
+    const std::vector<Real>& characteristic_time) const {
+  std::vector<Real> gamma(shear_modulus.size());
+  for (size_t i = 0; i < shear_modulus.size(); ++i) {
+    gamma[i] = time_step / (characteristic_time[i] + time_step);
+  }
+  return gamma;
+}
+
+/* ------------------------------------------------------------------------- */
+Real MaxwellViscoelastic::solve(std::vector<Real> target) {}
 
 }  // namespace tamaas
 /* ------------------------------------------------------------------------- */

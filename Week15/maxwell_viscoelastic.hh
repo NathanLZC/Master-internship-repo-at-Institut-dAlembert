@@ -32,12 +32,12 @@ namespace tamaas {
 
 class MaxwellViscoelastic : public PolonskyKeerRey {
 public:
-  pubilc :
-      /// Constructor
-      MaxwellViscoelastic(Model& model, const GridBase<Real>& surface,
-                          Real tolerance, Real time_step,
-                          std::vector<Real> shear_modulus_maxwell,
-                          std::vector<Real> characteristic_time);
+public:
+  /// Constructor
+  MaxwellViscoelastic(Model& model, const GridBase<Real>& surface,
+                      Real tolerance, Real time_step,
+                      std::vector<Real> shear_modulus_maxwell,
+                      std::vector<Real> characteristic_time);
   ~MaxwellViscoelastic() override = default;
 
 public:
@@ -58,6 +58,13 @@ public:
                const std::vector<Real>& characteristic_time) const;
   /// Main solve function with backward euler scheme
   Real solve(std::vector<Real> target) override;
-}
+
+protected:
+  Real time_step_;
+  std::vector<Real> shear_modulus_;
+  std::vector<Real> characteristic_time_;
+};
 
 }  // namespace tamaas
+
+#endif  // MAXWELL_VISCOELASTIC_HH
