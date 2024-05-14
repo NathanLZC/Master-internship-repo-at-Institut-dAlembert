@@ -24,7 +24,6 @@
 #ifndef MAXWELL_VISCOELASTIC_HH
 #define MAXWELL_VISCOELASTIC_HH
 /* -------------------------------------------------------------------------- */
-#include "contact_solver.hh"
 #include "polonsky_keer_rey.hh"
 #include "westergaard.hh"
 /* -------------------------------------------------------------------------- */
