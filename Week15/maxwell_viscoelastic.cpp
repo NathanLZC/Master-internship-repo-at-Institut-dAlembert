@@ -67,7 +67,38 @@ std::vector<Real> MaxwellViscoelastic::computeGamma(
 }
 
 /* ------------------------------------------------------------------------- */
-Real MaxwellViscoelastic::solve(std::vector<Real> target) {}
+Real MaxwellViscoelastic::solve(std::vector<Real> target) {
+
+
+  M_maxwell.fill(0);
+
+  for (size_t k = 0; k < M.size(); ++k) {
+    M_maxwell += gamma[k] * M[k];
+  }
+
+  H_new = alpha * Surface - beta * U + M_maxwell;
+  std::vector<Real> target = {/* populate with needed target values based on H_new or other criteria */};
+
+  // call PolonskyKeerRey::solve
+  Real error = PolonskyKeerRey::solve(target);
+
+  max_error = std::max(max_error, error);
+
+  GridBase<Real> U_new = (1 / alpha) * (M_maxwell + beta * U - H_new);
+
+  for (size_t k = 0; k < M.size(); ++k) {
+    M[k] += gamma[k] * (U_new - U);
+  }
+
+  // Accumulate pressure or other metrics if needed
+  Ac.push_back(
+      calculateMetricBasedOnPressureOrOtherCriteria());  // Adjust as necessary
+  U = U_new;
+
+  return max_error;
+
+
+}
 
 }  // namespace tamaas
 /* ------------------------------------------------------------------------- */

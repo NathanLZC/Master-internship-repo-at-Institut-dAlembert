@@ -62,6 +62,10 @@ protected:
   Real time_step_;
   std::vector<Real> shear_modulus_;
   std::vector<Real> characteristic_time_;
+  // Two dimension array partial displacement M
+  std::vector<GridBase<Real>> M;
+  // Global displacement U
+  GridBase<Real> U;
 };
 
 }  // namespace tamaas
