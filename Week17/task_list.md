@@ -1,0 +1,6 @@
+- find initial slope for Johnson(1985) solution
+- implement maxwell_viscoelastic class in tamaas
+- Ph.D. application interview powerpoint
+- deduce for maxwell mode(chinese document)
+- shear modulus weight
+- report
