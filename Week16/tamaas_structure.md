@@ -55,8 +55,9 @@ Our implementation for viscoelasticity with generalized Maxwell model should der
 
 ##### polonsky_keer_rey
 
-??
-The following two types are for pressure:
+
+The following two types are for pressure, in maxwell_viscoelastic class, we don't need to play with it:
+
 ```bash
 protected:
   type variable_type, constraint_type;
