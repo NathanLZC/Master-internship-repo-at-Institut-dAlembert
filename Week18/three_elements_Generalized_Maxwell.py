@@ -1,9 +1,9 @@
 ### This script is for the Maxwell multi-branch model.
 ### Deduce process is in generalized_Maxwell_backward_Euler.ipynb
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from IPython.display import HTML
 #define input parameters
 ##time
 t0 = 0
@@ -29,7 +29,7 @@ x0 = 1
 y0 = 1
 
 E = 3  # Young's modulus
-nu = 0.4 #follow Johnson's book (1985)
+nu = 0.5 #follow Johnson's book (1985)
 E_star = E / (1 - nu**2)  # Plane strain modulus
 
 # We define the distance from the center of the sphere
@@ -230,8 +230,7 @@ fig, ax = plt.subplots()
 # create an animation
 ani = FuncAnimation(fig, update, frames=len(pressure_distributions), repeat=False)
 
-HTML(ani.to_jshtml())
-#plt.show()
+plt.show()
 
 #save the result to reduce the time of re-run
 np.save('Ac_10seconds.npy', Ac)
