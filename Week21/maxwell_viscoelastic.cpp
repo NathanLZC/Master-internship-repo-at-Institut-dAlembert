@@ -23,9 +23,9 @@
 /* -------------------------------------------------------------------------- */
 #include "maxwell_viscoelastic.hh"
 #include "logger.hh"
+#include "loop.hh"
 #include "model.hh"
 #include "model_type.hh"
-#include "loop.hh"
 /* -------------------------------------------------------------------------- */
 
 namespace tamaas {
@@ -33,16 +33,24 @@ namespace tamaas {
 MaxwellViscoelastic::MaxwellViscoelastic(Model& model,
                                          const GridBase<Real>& surface,
                                          Real tolerance, Real time_step,
+                                         Real G_inf,
                                          std::vector<Real> shear_modulus,
                                          std::vector<Real> characteristic_time)
     : PolonskyKeerRey(model, surface, tolerance, PolonskyKeerRey::pressure,
                       PolonskyKeerRey::pressure),
-      time_step_(time_step), shear_modulus_(shear_modulus),
-      characteristic_time_(characteristic_time) {
+      time_step_(time_step), G_inf(G_inf), shear_modulus_(shear_modulus),
+      characteristic_time_(characteristic_time), M(characteristic_time.size()),
+      U(model.getDisplacement().getNbPoints(),
+        model.getDisplacement().getNbComponents()) {
   // Check that the number of shear moduli and characteristic times is correct
   if (shear_modulus_.size() != characteristic_time_.size()) {
     throw std::invalid_argument(
         "The number of shear moduli and characteristic times must be equal.");
+  }
+
+  for (UInt k = 0; k < M.size(); ++k) {
+    M[k] = GridBase<Real>(model.getDisplacement().getNbPoints(),
+                          model.getDisplacement().getNbComponents());
   }
 }
 
@@ -70,34 +78,61 @@ std::vector<Real> MaxwellViscoelastic::computeGamma(
 }
 
 /* ------------------------------------------------------------------------- */
-Real MaxwellViscoelastic::solve(std::vector<Real> target) {
+Real MaxwellViscoelastic::solve(std::vector<Real> target_viscoelastic) {
 
-  M_maxwell.fill(0);
+  auto& M_new = model.getDisplacement();
+
+  auto gtilde = computeGtilde(time_step_, shear_modulus_, characteristic_time_);
+  auto gamma = computeGamma(time_step_, shear_modulus_, characteristic_time_);
+
+  Real alpha = gtilde + G_inf;
+  Real beta = gtilde;
+
+  GridBase<Real> M_maxwell(M_new.getNbPoints(), M_new.getNbComponents());
+  GridBase<Real> H_new(M_new.getNbPoints(), M_new.getNbComponents());
 
   for (size_t k = 0; k < M.size(); ++k) {
-    M_maxwell += gamma[k] * M[k];
+    auto gamma_k = gamma[k];
+    Loop::loop(
+        [gamma_k](Real& M_maxwell, const Real& M) { M_maxwell += gamma_k * M; },
+        M_maxwell, M[k]);
   }
 
-  H_new = alpha * Surface - beta * U + M_maxwell;
-  std::vector<Real> target = {/* populate with needed target values based on H_new or other criteria */};
+  Loop::loop(
+      [alpha, beta, gamma](Real& h_new, const Real& surface, const Real& u,
+                           const Real& maxwell) {
+        h_new = alpha * surface - beta * u + maxwell;
+      },
+      H_new, this->surface, U, M_maxwell);
+
+  const Real target = target_viscoelastic.back();
 
   // call PolonskyKeerRey::solve
-  Real error = PolonskyKeerRey::solve(target);
+  Real error =
+      PolonskyKeerRey::solve(target);  //???shall we return something as M_new?
 
-  max_error = std::max(max_error, error);
+  GridBase<Real> U_new(U.getNbPoints(), U.getNbComponents());
 
-  GridBase<Real> U_new = (1 / alpha) * (M_maxwell + beta * U - H_new);
+  Loop::loop(
+      [alpha, beta](Real& U_new, const Real& M_new, const Real& M_maxwell,
+                    const Real& U) {
+        U_new = (1 / alpha) * (M_new - M_maxwell + beta * U);
+      },
+      U_new, M_new, M_maxwell, U);
 
-  for (size_t k = 0; k < M.size(); ++k) {
-    M[k] += gamma[k] * (U_new - U);
+  for (size_t k = 0; k < shear_modulus_.size(); ++k) {
+    auto gamma_k = gamma[k];
+    auto shear_modulus_k = shear_modulus_[k];
+    Loop::loop(
+        [gamma_k, shear_modulus_k](Real& M, const Real& U_new, const Real& U) {
+          M = gamma_k * (M + shear_modulus_k * (U_new - U));
+        },
+        M[k], U_new, U);
   }
 
-  // Accumulate pressure or other metrics if needed
-  Ac.push_back(
-      calculateMetricBasedOnPressureOrOtherCriteria());  // Adjust as necessary
   U = U_new;
 
-  return max_error;
+  return error;
 }
 
 }  // namespace tamaas

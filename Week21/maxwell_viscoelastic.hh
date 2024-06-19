@@ -34,7 +34,7 @@ public:
 public:
   /// Constructor
   MaxwellViscoelastic(Model& model, const GridBase<Real>& surface,
-                      Real tolerance, Real time_step,
+                      Real tolerance, Real time_step, Real G_inf,
                       std::vector<Real> shear_modulus_maxwell,
                       std::vector<Real> characteristic_time);
   ~MaxwellViscoelastic() override = default;
@@ -60,6 +60,7 @@ public:
 
 protected:
   Real time_step_;
+  Real G_inf;  // Elastic branch for Generalized Maxwell model
   std::vector<Real> shear_modulus_;
   std::vector<Real> characteristic_time_;
   // Two dimension array partial displacement M
