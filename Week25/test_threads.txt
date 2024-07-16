@@ -1,0 +1,25 @@
+for 4 threads, surface discretization 256:
+
+Execution time: 21.084519983967766
+Fitted beta: 4.357368246452104e-06
+[[8.86703451e-16 2.36406821e-09]
+ [2.36406821e-09 6.34432677e-03]]
+contact area percentage 0.05987548828125
+
+for 8 threads, surface discretization 256:
+
+Execution time: 16.277597764972597
+Fitted beta: 4.357368246452104e-06
+[[8.86703451e-16 2.36406821e-09]
+ [2.36406821e-09 6.34432677e-03]]
+contact area percentage 0.05987548828125
+
+for 16 threads, surface discretization 256:
+
+Execution time: 249.97747333487496
+Fitted beta: 4.357368246452104e-06
+[[8.86703451e-16 2.36406821e-09]
+ [2.36406821e-09 6.34432677e-03]]
+contact area percentage 0.05987548828125
+
+
